@@ -85,3 +85,104 @@ a {
     color: #0f1f2c;
 
 }
+/* 🔹 Contenedor de billeteras */
+#listaBilleteras {
+    display: flex;
+    flex-wrap: wrap; /* Permite que pasen a la siguiente línea si no caben */
+    gap: 10px; /* Espaciado entre billeteras */
+    justify-content: flex-start; /* Alinear billeteras a la izquierda */
+    padding: 10px;
+    list-style: none; /* Elimina los puntos de la lista */
+    margin: 0;
+}
+
+/* 🔹 Tarjeta individual de cada billetera */
+.billetera-card {
+    flex: 1 1 calc(25% - 10px); /* 4 billeteras por fila, ajusta según necesidad */
+    min-width: 80px;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* 🔹 Colores distintos para cada billetera */
+.billetera-card:nth-child(1) { background-color: #1E3A8A; } /* Azul oscuro */
+.billetera-card:nth-child(2) { background-color: #9333EA; } /* Morado */
+.billetera-card:nth-child(3) { background-color: #E11D48; } /* Rojo */
+.billetera-card:nth-child(4) { background-color: #15803D; } /* Verde */
+.billetera-card:nth-child(5) { background-color: #A16207; } /* Mostaza */
+.billetera-card:nth-child(6) { background-color: #0D9488; } /* Turquesa */
+
+/* 🔹 Ajustes para el texto dentro de la billetera */
+.billetera-card strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.billetera-card span {
+    font-size: 16px;
+}
+
+
+
+/* 🔹 Personalizar el contenedor principal */
+.swal2-popup {
+    border-radius: 8px; /* Bordes redondeados */
+    background: #ffffff; /* Fondo blanco */
+    color: #0f1f2c; /* Color principal de texto */
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ddd;
+}
+
+/* 🔹 Personalizar el título */
+.swal2-title {
+    color: #0f1f2c; /* Azul oscuro */
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 🔹 Personalizar los inputs */
+.swal2-input,
+.swal2-select {
+    background: #f8f9fa; /* Gris claro */
+    color: #0f1f2c; /* Texto oscuro */
+    border: 1px solid #0f1f2c;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 8px;
+    width: 80%;
+}
+
+/* 🔹 Personalizar los botones */
+.swal2-confirm {
+    background: #0f1f2c !important; /* Azul oscuro */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+.swal2-cancel {
+    background: #dc2626 !important; /* Rojo */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+/* 🔹 Agregar efecto hover a los botones */
+.swal2-confirm:hover {
+    background: #1e293b !important; /* Azul más oscuro */
+}
+
+.swal2-cancel:hover {
+    background: #b91c1c !important; /* Rojo más oscuro */
+}

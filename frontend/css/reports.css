@@ -1,0 +1,33 @@
+body {
+    background-color: #f8f9fa;
+    margin: 0;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0f1f2c;
+    padding: 0;
+    box-shadow: 1px 1px 3px #cacfd2;
+    margin: 0;
+    
+}
+
+.navbarBrand  img{
+    height: 35px;
+    width: 65px;
+    padding: 5px;
+    margin: 0;
+}
+
+.navbar a {
+    font-size: 11px;
+    text-decoration: none;
+    color: white;
+    padding: 5px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
