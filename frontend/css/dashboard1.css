@@ -85,6 +85,24 @@ a {
     color: #0f1f2c;
 
 }
+
+.containerFicha .card.ficha-summary {
+    background-color: #f0f0f0;  /* Color de fondo (ajusta según tu preferencia) */
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid grey;
+  }
+  
+  .containerFicha .card.ficha-summary .cardBody p {
+    font-size: 15px;  /* Aumenta el tamaño de la fuente */
+    margin: 0;
+  }
+  
+  .containerFicha .card.ficha-summary .cardBody p strong {
+    font-size: 20px;  /* Si quieres que el número sea aun más grande */
+    color: #333;
+  }
+  
 /* 🔹 Contenedor de billeteras */
 #listaBilleteras {
     display: flex;

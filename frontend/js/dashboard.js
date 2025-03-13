@@ -23,47 +23,44 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // **Obtener la caja seleccionada (Caja 1 o Caja 2)**
-    function obtenerCajaSeleccionada() {
-        const caja = localStorage.getItem("cajaSeleccionada");
-        console.log("📌 Caja seleccionada:", caja);
-        return caja || "Caja 1"; // Si no hay valor, por defecto "Caja 1"
-    }
-
-    // **Cargar billeteras filtradas por caja**
+    // **Obtener la billeteras
     async function cargarBilleteras() {
-        const cajaSeleccionada = localStorage.getItem("cajaSeleccionada") || "Caja 1"; // Recuperar la caja guardada
-    
-        console.log("📌 Caja seleccionada al cargar billeteras:", cajaSeleccionada);
-    
+        const puestoSeleccionado = localStorage.getItem("puestoSeleccionado"); // ID del job
+        console.log("📌 Puesto seleccionado al cargar billeteras:", puestoSeleccionado);
+      
         try {
-            const response = await fetch(API_URL_BILLETERAS);
-            const billeteras = await response.json();
-            listaBilleteras.innerHTML = ""; // Limpiar lista antes de actualizar
-    
-            // Filtrar billeteras según la caja seleccionada
-            const billeterasFiltradas = billeteras.filter(billetera => billetera.caja === cajaSeleccionada);
-    
-            if (billeterasFiltradas.length === 0) {
-                listaBilleteras.innerHTML = `<p>No hay billeteras en ${cajaSeleccionada}.</p>`;
-            } else {
-                billeterasFiltradas.forEach(billetera => {
-                    let div = document.createElement("div");
-                    div.classList.add("billetera-card"); // Agregar la clase para el estilo
-    
-                    div.innerHTML = `
-                        <strong>${billetera.nombre}</strong>
-                        <span>$${billetera.saldo.toFixed(2)}</span>
-                    `;
-    
-                    listaBilleteras.appendChild(div);
-                });
-            }
+          const response = await fetch(API_URL_BILLETERAS);
+          const billeteras = await response.json();
+          listaBilleteras.innerHTML = ""; // Limpiar lista antes de actualizar
+      
+          // Filtrar billeteras según el job seleccionado
+          // OJO: Si tu endpoint devuelva `billetera.caja` como un objeto (por populate),
+          // haz: billetera.caja._id === puestoSeleccionado
+          const billeterasFiltradas = billeteras.filter(billetera => {
+            return billetera.caja === puestoSeleccionado; 
+            // o billetera.caja._id === puestoSeleccionado si populaste
+          });
+      
+          if (billeterasFiltradas.length === 0) {
+            listaBilleteras.innerHTML = `<p>No hay billeteras para este puesto.</p>`;
+          } else {
+            billeterasFiltradas.forEach(billetera => {
+              let div = document.createElement("div");
+              div.classList.add("billetera-card");
+      
+              div.innerHTML = `
+                <strong>${billetera.nombre}</strong>
+                <span>$${billetera.saldo.toFixed(2)}</span>
+              `;
+              listaBilleteras.appendChild(div);
+            });
+          }
         } catch (error) {
-            console.error("❌ Error al cargar billeteras:", error);
-            listaBilleteras.innerHTML = `<p>Error al cargar billeteras.</p>`;
+          console.error("❌ Error al cargar billeteras:", error);
+          listaBilleteras.innerHTML = `<p>Error al cargar billeteras.</p>`;
         }
-    }
+      }
+      
     
     
     
@@ -95,6 +92,35 @@ document.addEventListener("DOMContentLoaded", function () {
     cargarBilleteras();
 });
 
-
+document.addEventListener("DOMContentLoaded", async function () {
+    // Obtener el ID del puesto seleccionado del localStorage
+    const puestoSeleccionado = localStorage.getItem("puestoSeleccionado");
+    if (!puestoSeleccionado) {
+      console.warn("No se encontró un puesto seleccionado");
+      return;
+    }
+  
+    try {
+      // Obtener el job por ID
+      const response = await fetch(`http://localhost:5000/api/jobs/${puestoSeleccionado}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error al obtener el puesto:", errorData);
+        return;
+      }
+  
+      const job = await response.json();
+      // Suponiendo que en el modelo se utiliza 'fichas' para la cantidad de fichas
+      const cantidadFichas = job.fichas || 0;
+      // Formatear el número con separador de miles
+      const formattedFichas = cantidadFichas.toLocaleString("es-ES");
+  
+      // Actualizar el contenido del elemento
+      document.getElementById("cantidadFichas").textContent = formattedFichas;
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+  });
+  
 
 

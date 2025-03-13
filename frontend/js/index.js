@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (rol === "Administrador") {
                     window.location.href = "dashboardAdmin.html"; // Redirige a Admin
                 } else if (rol === "Cajero") {
-                    seleccionarCaja(); // Mostrar opción de Caja
+                    seleccionarCaja(); // Mostrar opción de Caja (en este caso, puestos de trabajo)
                 } else {
                     Swal.fire("Error", "Rol no válido", "error");
                 }
@@ -53,28 +53,52 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // **Función para mostrar selección de Caja y guardarla en `localStorage`**
-    function seleccionarCaja() {
-        Swal.fire({
-            title: "Selecciona una Caja",
-            input: "select",
-            inputOptions: {
-                "Caja 1": "Caja 1",
-                "Caja 2": "Caja 2"
-            },
-            inputPlaceholder: "Elige una opción",
-            showCancelButton: false,
-            confirmButtonText: "Ingresar",
-            allowOutsideClick: false
-        }).then((result) => {
-            if (result.isConfirmed) {
-                localStorage.setItem("cajaSeleccionada", result.value); // ✅ Guardar en `localStorage`
-                console.log("📌 Caja seleccionada:", result.value);
-                
-                // **Redirigir según la caja elegida**
-                window.location.href = result.value === "Caja 1" ? "dashboard1.html" : "dashboard2.html";
+    // **Función para mostrar selección de Puesto (Job) y guardarlo en `localStorage`**
+    async function seleccionarCaja() {
+        try {
+            // 1. Obtener la lista de jobs desde el backend
+            const response = await fetch("http://localhost:5000/api/jobs");
+            const jobs = await response.json();
+
+            if (!Array.isArray(jobs) || !jobs.length) {
+                // Si no hay puestos, mostrar un mensaje y no continuar
+                Swal.fire("⚠️ Sin Puestos", "No hay puestos de trabajo registrados.", "warning");
+                return;
             }
-        });
+
+            // 2. Construir un objeto para las opciones del select de SweetAlert
+            //    { jobId: jobName }
+            const inputOptions = {};
+            jobs.forEach(job => {
+                inputOptions[job._id] = job.name; // { "645ddf...": "Puesto 1", ... }
+            });
+
+            // 3. Mostrar el SweetAlert con un select dinámico
+            const { value: selectedJobId } = await Swal.fire({
+                title: "Selecciona un Puesto",
+                input: "select",
+                inputOptions: inputOptions,
+                inputPlaceholder: "Elige un Puesto",
+                showCancelButton: false,
+                confirmButtonText: "Ingresar",
+                allowOutsideClick: false
+            });
+
+            if (selectedJobId) {
+                // Guardar en localStorage para usarlo luego
+                localStorage.setItem("puestoSeleccionado", selectedJobId);
+                console.log("📌 Puesto seleccionado:", selectedJobId);
+
+                // 4. Redirigir según el puesto elegido (ejemplo)
+                //    Ajusta las redirecciones según tu lógica
+                window.location.href = "dashboard1.html";
+            }
+
+        } catch (error) {
+            console.error("❌ Error al obtener los puestos:", error);
+            Swal.fire("❌ Error", "No se pudo obtener la lista de puestos", "error");
+        }
     }
 });
+
 
