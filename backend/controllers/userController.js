@@ -88,19 +88,28 @@ const loginUsuario = async (req, res) => {
 
 // **Middleware para verificar el token**
 const verificarToken = (req, res, next) => {
-    const token = req.header("Authorization");
-    if (!token) {
-        return res.status(401).json({ error: "Acceso denegado" });
+    const authHeader = req.headers['authorization'];
+    console.log("🔐 Header recibido:", authHeader); // 👈 log del header
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        console.log("❌ Token no presente o malformado");
+        return res.status(401).json({ error: "Token no proporcionado o malformado" });
     }
 
+    const token = authHeader.split(" ")[1];
+
     try {
-        const usuarioVerificado = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
-        req.usuario = usuarioVerificado;
+        const usuarioVerificado = jwt.verify(token, SECRET_KEY);
+        console.log("✅ Token válido. Usuario:", usuarioVerificado); // 👈 log del contenido
+        req.user = usuarioVerificado;
         next();
     } catch (error) {
-        res.status(401).json({ error: "Token inválido" });
+        console.log("❌ Token inválido:", error.message); // 👈 error exacto
+        res.status(401).json({ error: "Token inválido o expirado" });
     }
 };
+
+
 
 module.exports = {
     obtenerUsuarios,

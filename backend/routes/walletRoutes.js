@@ -6,9 +6,12 @@ const {
     eliminarWallet
 } = require("../controllers/walletController");
 
-// **Definir las rutas**
-router.get("/", obtenerWallets);
-router.post("/", crearWallet);
-router.delete("/:id", eliminarWallet);
+const { verificarToken } = require("../controllers/userController"); // 👈 importar middleware
+
+// ✅ APLICAR EL MIDDLEWARE DE AUTENTICACIÓN
+router.get("/", verificarToken, obtenerWallets);
+router.post("/", verificarToken, crearWallet);
+router.delete("/:id", verificarToken, eliminarWallet);
 
 module.exports = router;
+

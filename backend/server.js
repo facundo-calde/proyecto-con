@@ -7,7 +7,7 @@ require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 const walletRoutes = require("./routes/walletRoutes");
 const userRoutes = require("./routes/userRoutes");
 const jobRoutes = require('./routes/jobRoutes'); 
-
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000; // Usa el puerto de .env o 5000 por defecto
 const mongoURI = process.env.MONGO_URI;
@@ -35,7 +35,7 @@ mongoose.connect(mongoURI)
 app.use("/api/wallets", walletRoutes);
 app.use("/api/users", userRoutes);
 app.use('/api/jobs', jobRoutes );
-
+app.use("/api", dashboardRoutes);
 
 // **Iniciar servidor**
 app.listen(PORT, () => {
