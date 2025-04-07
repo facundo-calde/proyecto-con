@@ -44,6 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     Swal.fire("Error", "Rol no válido", "error");
                 }
 
+            } else if (response.status === 403) {
+                // Si el estado del usuario es inactivo
+                Swal.fire("❌ Usuario Inactivo", "Tu cuenta está inactiva. No puedes iniciar sesión.", "error");
             } else {
                 Swal.fire("❌ Error", data.error || "Usuario o contraseña incorrectos", "error");
             }
@@ -90,7 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log("📌 Puesto seleccionado:", selectedJobId);
 
                 // 4. Redirigir según el puesto elegido (ejemplo)
-                //    Ajusta las redirecciones según tu lógica
                 window.location.href = "dashboard1.html";
             }
 
@@ -100,5 +102,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 });
+
 
 

@@ -1,10 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { obtenerUsuarios, crearUsuario, loginUsuario, verificarToken } = require("../controllers/userController");
+const userController = require("../controllers/userController");
+
+
+
 
 // **Rutas de Usuarios**
-router.get("/", verificarToken, obtenerUsuarios); // Protegida con JWT
-router.post("/", crearUsuario);
-router.post("/login", loginUsuario);
+router.get("/", userController.verificarToken, userController.obtenerUsuarios);
+router.post("/", userController.crearUsuario);
+router.post("/login", userController.loginUsuario);
+router.patch('/:id/password', userController.verificarToken, userController.cambiarPassword);
+router.patch("/:id", userController.verificarToken, userController.cambiarEstadoUsuario);
+
+
 
 module.exports = router;

@@ -81,6 +81,18 @@ a {
 
 }
 
+.modifyUser {
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
+.deleteWallet {
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
 .modify{
     padding:0 5px 0 5px;
     color: #0f1f2c;

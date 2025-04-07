@@ -102,11 +102,17 @@ function asignarEventos() {
                 }
         
                 Swal.fire({ title: "Guardando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const token = localStorage.getItem("token"); // Obtener el token del localStorage
+
                 const response = await fetch(API_WALLETS, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`  // Aquí se agrega el token a la cabecera
+                    },
                     body: JSON.stringify(walletData)
                 });
+                
         
                 const data = await response.json();
                 if (response.ok) {
@@ -322,3 +328,324 @@ async function modificarPuesto() {
   
   document.addEventListener("DOMContentLoaded", modificarPuesto);
   
+  //Cambiar conttraseña
+const changePasswordLink = document.querySelector(".changePassword");
+
+if (!changePasswordLink) {
+  console.error("🔴 No se encontró el enlace .changePassword");
+} else {
+  changePasswordLink.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const { value: formValues } = await Swal.fire({
+      title: "Cambiar Contraseña",
+      html: `
+        <input id="old-password" type="password" class="swal2-input" placeholder="Contraseña actual">
+        <input id="new-password" type="password" class="swal2-input" placeholder="Nueva contraseña">
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Guardar",
+      cancelButtonText: "Cancelar",
+      preConfirm: () => {
+        const oldPassword = document.getElementById("old-password").value.trim();
+        const newPassword = document.getElementById("new-password").value.trim();
+
+        if (!oldPassword || !newPassword) {
+          Swal.showValidationMessage("Ambos campos son obligatorios");
+          return false;
+        }
+
+        if (newPassword.length < 4) {
+          Swal.showValidationMessage("La nueva contraseña debe tener al menos 4 caracteres");
+          return false;
+        }
+
+        return { oldPassword, newPassword };
+      }
+    });
+
+    if (!formValues) return;
+
+    const { oldPassword, newPassword } = formValues;
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return Swal.fire("Error", "No se encontró el token. Iniciá sesión nuevamente.", "error");
+    }
+
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const userId = payload.id;
+
+    try {
+      Swal.fire({ title: "Validando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+      const response = await fetch(`http://localhost:5000/api/users/${userId}/password`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Swal.fire("✅ Contraseña actualizada", "", "success");
+      } else {
+        Swal.fire("❌ Error", data.message || "No se pudo cambiar la contraseña", "error");
+      }
+    } catch (err) {
+      console.error("❌ Error:", err);
+      Swal.fire("❌ Error", "No se pudo conectar con el servidor", "error");
+    }
+  });
+}
+
+//Borra billetera
+document.addEventListener("DOMContentLoaded", async function () {
+  const botonBorrarWallet = document.querySelector(".deleteWallet");
+
+  if (!botonBorrarWallet) {
+    console.error("❌ No se encontró el botón .deleteWallet");
+    return;
+  }
+
+  botonBorrarWallet.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/wallets", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // Asegúrate de que el token esté presente
+        }
+      });
+
+      const wallets = await response.json();
+
+      if (!Array.isArray(wallets) || wallets.length === 0) {
+        return Swal.fire("⚠️", "No hay billeteras disponibles para borrar", "warning");
+      }
+
+      // Crear opciones para el select
+      const options = wallets.map(wallet => `<option value="${wallet._id}">${wallet.nombre} (Saldo: ${wallet.saldo})</option>`).join("");
+
+      // Mostrar SweetAlert con un select para elegir la billetera
+      const { value: walletToDelete } = await Swal.fire({
+        title: "Seleccionar Billetera para Borrar",
+        html: `
+          <select id="wallet-select" class="swal2-input">
+            ${options}
+          </select>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+        preConfirm: () => {
+          return document.getElementById("wallet-select").value;
+        }
+      });
+
+      if (!walletToDelete) return;
+
+      // Confirmación de borrado
+      const confirmDelete = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Esta acción eliminará la billetera de manera permanente.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+      });
+
+      if (confirmDelete.isConfirmed) {
+        // Realizar la solicitud para eliminar la billetera
+        const deleteResponse = await fetch(`http://localhost:5000/api/wallets/${walletToDelete}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const deleteData = await deleteResponse.json();
+
+        if (deleteResponse.ok) {
+          Swal.fire("✅ Billetera eliminada", "", "success");
+        } else {
+          Swal.fire("❌ Error", deleteData.message || "No se pudo eliminar la billetera", "error");
+        }
+      }
+    } catch (err) {
+      console.error("❌ Error:", err);
+      Swal.fire("❌ Error", "No se pudo conectar con el servidor", "error");
+    }
+  });
+});
+
+//modificar usuario
+document.addEventListener("DOMContentLoaded", async function () {
+  const botonModificarUsuario = document.querySelector(".modifyUser");
+
+  if (!botonModificarUsuario) {
+    console.error("❌ No se encontró el botón .modifyUser");
+    return;
+  }
+
+  botonModificarUsuario.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    try {
+      // Obtener los usuarios desde el backend
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      const users = await response.json();
+
+      if (!Array.isArray(users) || users.length === 0) {
+        return Swal.fire("⚠️", "No hay usuarios para modificar", "warning");
+      }
+
+      // Crear opciones para el select
+      const options = users.map(user => 
+        `<option value="${user._id}" data-estado="${user.estado}">${user.nombre} (${user.rol}) - ${user.estado ? "Activo" : "Inactivo"}</option>`
+      ).join("");
+
+      // Mostrar SweetAlert con un select para elegir el usuario a modificar
+      const { value: userToModify } = await Swal.fire({
+        title: "Seleccionar Usuario para Modificar Estado",
+        html: ` 
+          <select id="user-select" class="swal2-input">
+            ${options}
+          </select>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: "Modificar",
+        cancelButtonText: "Cancelar",
+        preConfirm: () => {
+          return document.getElementById("user-select").value;
+        }
+      });
+
+      if (!userToModify) return;
+
+      // Obtener el estado actual del usuario seleccionado
+      const selectedUser = users.find(user => user._id === userToModify);
+      const estadoUsuario = selectedUser.estado ? "Inactivo" : "Activo"; // Cambiar según el estado
+
+      // Cambiar el texto del botón dependiendo del estado
+      const confirmText = selectedUser.estado ? "Marcar como Inactivo" : "Marcar como Activo";
+
+      // Confirmación de modificación del estado
+      const confirmModify = await Swal.fire({
+        title: `Cambiar Estado del Usuario: ${selectedUser.nombre}`,
+        text: `¿Estás seguro de que quieres cambiar el estado de este usuario a ${estadoUsuario}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: "Cancelar"
+      });
+
+      if (confirmModify.isConfirmed) {
+        // Realizar la solicitud para cambiar el estado del usuario
+        const modifyResponse = await fetch(`http://localhost:5000/api/users/${userToModify}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            estado: !selectedUser.estado // Cambiar el estado (si estaba activo lo pone inactivo, y viceversa)
+          })
+        });
+
+        const modifyData = await modifyResponse.json();
+
+        if (modifyResponse.ok) {
+          Swal.fire("✅ Estado modificado", "", "success");
+          // Opcional: Actualiza la interfaz si el estado cambia
+        } else {
+          Swal.fire("❌ Error", modifyData.message || "No se pudo modificar el estado del usuario", "error");
+        }
+      }
+    } catch (err) {
+      console.error("❌ Error:", err);
+      Swal.fire("❌ Error", "No se pudo conectar con el servidor", "error");
+    }
+  });
+});
+
+
+// **Obtener todas las billeteras**
+document.addEventListener("DOMContentLoaded", function () {
+  const listaBilleteras = document.getElementById("listaBilleteras");
+
+  // **Obtener todas las billeteras
+  async function cargarBilleteras() {
+      console.log("📌 Cargando todas las billeteras...");
+
+      try {
+          const token = localStorage.getItem("token");
+
+          // Verificamos si el token está presente
+          if (!token) {
+              Swal.fire("Error", "No se encontró el token. Por favor, inicia sesión.", "error");
+              return;
+          }
+
+          const response = await fetch("http://localhost:5000/api/wallets", {
+              headers: {
+                  "Authorization": `Bearer ${token}`
+              }
+          });
+
+          // Verificar que la respuesta fue exitosa
+          if (!response.ok) {
+              console.error("❌ Error en la respuesta del servidor:", response.status);
+              Swal.fire("Error", "No se pudo obtener las billeteras.", "error");
+              return;
+          }
+
+          const billeteras = await response.json();
+          listaBilleteras.innerHTML = ""; // Limpiar lista antes de actualizar
+
+          if (billeteras.length === 0) {
+              listaBilleteras.innerHTML = "<li>No hay billeteras registradas.</li>";
+          } else {
+              billeteras.forEach(billetera => {
+                  let li = document.createElement("li");
+                  li.classList.add("billetera-card"); // Agrega una clase para estilo si es necesario
+
+                  // Mostrar nombre y saldo de cada billetera
+                  li.innerHTML = `
+                      <strong>${billetera.nombre}</strong> - 
+                      <span>$${billetera.saldo.toFixed(2)}</span>
+                  `;
+                  listaBilleteras.appendChild(li);
+              });
+          }
+      } catch (error) {
+          console.error("❌ Error al cargar billeteras:", error);
+          listaBilleteras.innerHTML = "<li>Error al cargar billeteras.</li>";
+      }
+  }
+
+  // Llamamos a la función al cargar la página
+  cargarBilleteras();
+});
+
+
+
+

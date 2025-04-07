@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jobController = require('../controllers/jobController');
 
+
 // Definir rutas para los puestos de trabajo
 router.get('/', jobController.getAllJobs); // Obtener todos los puestos
 router.get('/:id', jobController.getJobById); // Obtener un puesto por ID

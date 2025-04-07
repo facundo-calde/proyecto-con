@@ -66,6 +66,11 @@ const loginUsuario = async (req, res) => {
             return res.status(400).json({ error: "Usuario o contraseña incorrectos" });
         }
 
+        // **Verificar si el usuario está activo**
+        if (!usuario.estado) {
+            return res.status(403).json({ error: "Tu cuenta está inactiva. No puedes iniciar sesión." });
+        }
+
         // **Comparar la contraseña**
         const esPasswordCorrecto = await bcrypt.compare(password, usuario.password);
         if (!esPasswordCorrecto) {
@@ -86,13 +91,12 @@ const loginUsuario = async (req, res) => {
     }
 };
 
+
 // **Middleware para verificar el token**
 const verificarToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    console.log("🔐 Header recibido:", authHeader); // 👈 log del header
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        console.log("❌ Token no presente o malformado");
         return res.status(401).json({ error: "Token no proporcionado o malformado" });
     }
 
@@ -100,20 +104,72 @@ const verificarToken = (req, res, next) => {
 
     try {
         const usuarioVerificado = jwt.verify(token, SECRET_KEY);
-        console.log("✅ Token válido. Usuario:", usuarioVerificado); // 👈 log del contenido
-        req.user = usuarioVerificado;
-        next();
+        req.user = usuarioVerificado;  // Guarda la información del usuario en req.user
+        next();  // Llama al siguiente middleware
     } catch (error) {
-        console.log("❌ Token inválido:", error.message); // 👈 error exacto
-        res.status(401).json({ error: "Token inválido o expirado" });
+        return res.status(401).json({ error: "Token inválido o expirado" });
     }
 };
 
+//Modificar contraseña
+const cambiarPassword = async (req, res) => {
+    const { id } = req.params;
+    const { oldPassword, newPassword } = req.body;
+  
+    if (!oldPassword || !newPassword || newPassword.length < 4) {
+      return res.status(400).json({ message: "Debes ingresar ambas contraseñas correctamente" });
+    }
+  
+    try {
+      const user = await User.findById(id);
+      if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+  
+      const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!passwordMatch) {
+        return res.status(401).json({ message: "La contraseña actual es incorrecta" });
+      }
+  
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+  
+      await user.save();
+  
+      res.json({ message: "Contraseña actualizada correctamente" });
+    } catch (error) {
+      console.error("❌ Error en cambio de contraseña:", error);
+      res.status(500).json({ message: "Error en el servidor" });
+    }
+  };
+  
+  //Modificar usuario
+  const cambiarEstadoUsuario = async (req, res) => {
+    const { id } = req.params;
+    const { estado } = req.body;
+  
+    try {
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+  
+      user.estado = estado;
+      await user.save();
+  
+      res.json({ message: "Estado de usuario actualizado", user });
+    } catch (error) {
+      console.error("❌ Error al actualizar el estado del usuario:", error);
+      res.status(500).json({ message: "Error al actualizar el estado del usuario" });
+    }
+  };
+  
+ 
 
-
-module.exports = {
+  module.exports = {
     obtenerUsuarios,
     crearUsuario,
     loginUsuario,
-    verificarToken
-};
+    verificarToken,
+    cambiarEstadoUsuario,
+    cambiarPassword
+  };
+  
