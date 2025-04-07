@@ -296,11 +296,17 @@ async function modificarPuesto() {
         const { selectedJobId, newFichas } = formValues;
   
         // Enviar la actualización al backend
-        const updateResponse = await fetch(`http://localhost:5000/api/jobs/${selectedJobId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fichas: newFichas })
+        const token = localStorage.getItem("token"); // <-- ESTA LÍNEA SOLUCIONA TODO
+
+        const updateResponse = await fetch(`http://localhost:5000/api/jobs/${selectedJobId}/movimiento`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ deltaFichas: newFichas })
         });
+        
         const updateData = await updateResponse.json();
         if (updateResponse.ok) {
           Swal.fire("✅ Actualizado", "Cantidad de fichas modificada con éxito", "success");

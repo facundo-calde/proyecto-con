@@ -76,3 +76,25 @@ exports.deleteJob = async (req, res) => {
     }
 };
 
+exports.modificarFichasPorDelta = async (req, res) => {
+    const { id } = req.params;
+    const { deltaFichas } = req.body;
+  
+    if (typeof deltaFichas !== "number") {
+      return res.status(400).json({ message: "El valor debe ser numérico" });
+    }
+  
+    try {
+      const job = await Job.findById(id);
+      if (!job) return res.status(404).json({ message: "Puesto no encontrado" });
+  
+      job.fichas += deltaFichas;
+      await job.save();
+  
+      res.json({ message: "Fichas actualizadas", fichas: job.fichas });
+    } catch (err) {
+      console.error("❌ Error en el servidor:", err);
+      res.status(500).json({ message: "Error en el servidor" });
+    }
+  };
+  
