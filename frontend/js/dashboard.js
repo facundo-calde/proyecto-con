@@ -40,8 +40,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const billeteras = await response.json();
       listaBilleteras.innerHTML = ""; // Limpiar lista antes de actualizar
 
-      // Filtrar billeteras según el job seleccionado
-      // OJO: Si tu endpoint devuelva `billetera.caja` como un objeto (por populate),
       // haz: billetera.caja._id === puestoSeleccionado
       const billeterasFiltradas = billeteras.filter(billetera => {
         return billetera.caja === puestoSeleccionado;
@@ -67,10 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
       listaBilleteras.innerHTML = `<p>Error al cargar billeteras.</p>`;
     }
   }
-
-
-
-
 
   // **Cerrar sesión (Eliminar token y caja seleccionada)**
   logoutBtn.addEventListener("click", function (event) {
@@ -136,53 +130,79 @@ const API_URL_GASTOS = "http://localhost:5000/api/gastos";
 // Asumamos que el primer enlace "➕ Agregar" es para depósitos sin reclamar 
 const addLinks = document.querySelectorAll("a.add");
 
-// --- Depósitos sin reclamar ---
 addLinks[0].addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const { value: monto } = await Swal.fire({
+  const token = localStorage.getItem("token");
+  const res = await fetch("http://localhost:5000/api/wallets", {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+
+  const billeteras = await res.json();
+  const billeteraOptions = billeteras.map(b => `<option value="${b._id}">${b.nombre}</option>`).join("");
+
+  const { value: formValues } = await Swal.fire({
     title: "Agregar Depósito sin reclamar",
-    html: `<input type="number" id="swal-deposito-monto" class="swal2-input" placeholder="Monto">`,
+    html: `
+      <input type="number" id="swal-deposito-monto" class="swal2-input" placeholder="Monto">
+      <select id="swal-deposito-billetera" class="swal2-input">
+        <option value="">Seleccioná una billetera</option>
+        ${billeteraOptions}
+      </select>
+    `,
     focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: "Guardar",
+    cancelButtonText: "Cancelar",
     preConfirm: () => {
-      const inputMonto = document.getElementById("swal-deposito-monto").value;
-      const monto = parseFloat(inputMonto);
+      const monto = parseFloat(document.getElementById("swal-deposito-monto").value);
+      const billeteraId = document.getElementById("swal-deposito-billetera").value;
+
       if (!monto || monto <= 0) {
-        Swal.showValidationMessage("Ingresa un monto válido");
+        Swal.showValidationMessage("Ingresá un monto válido");
+        return false;
       }
-      return monto;
+      if (!billeteraId) {
+        Swal.showValidationMessage("Seleccioná una billetera");
+        return false;
+      }
+
+      return { monto, billeteraId };
     }
   });
 
-  if (monto) {
-    // Preparar datos a enviar
-    const data = { monto, fecha: new Date() };
+  if (formValues) {
+    const { monto, billeteraId } = formValues;
 
-    // Obtener token del localStorage
-    const token = localStorage.getItem("token");
+    const data = {
+      monto,
+      billeteraId,
+      fecha: new Date()
+    };
 
     try {
-      const response = await fetch(API_URL_DEPOSITOS, {
+      const response = await fetch("http://localhost:5000/api/depositos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`  // Agregar token aquí
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
 
       if (response.ok) {
-        Swal.fire("Éxito", "Depósito agregado correctamente", "success");
-        // Actualizar interfaz si es necesario
+        Swal.fire("✅ Éxito", "Depósito agregado correctamente", "success");
       } else {
-        Swal.fire("Error", "No se pudo agregar el depósito", "error");
+        Swal.fire("❌ Error", "No se pudo agregar el depósito", "error");
       }
     } catch (error) {
-      console.error("Error en la solicitud:", error);
-      Swal.fire("Error", "Error en la solicitud", "error");
+      console.error("❌ Error:", error);
+      Swal.fire("❌ Error", "Error en la solicitud", "error");
     }
   }
 });
+
+
 
 // --- Gastos de oficina ---
 addLinks[1].addEventListener("click", async (e) => {

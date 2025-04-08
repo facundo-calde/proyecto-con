@@ -6,10 +6,12 @@ require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
 const walletRoutes = require("./routes/walletRoutes");
 const userRoutes = require("./routes/userRoutes");
-const jobRoutes = require('./routes/jobRoutes'); 
+const jobRoutes = require('./routes/jobRoutes');
+const movimientoRoutes = require("./routes/movimientoRoutes"); // Asegúrate de incluir la ruta de movimientos
 const dashboardRoutes = require('./routes/dashboardRoutes');
+
 const app = express();
-const PORT = process.env.PORT || 5000; // Usa el puerto de .env o 5000 por defecto
+const PORT = process.env.PORT || 5000;
 const mongoURI = process.env.MONGO_URI;
 
 app.use(express.json());
@@ -23,7 +25,7 @@ if (!mongoURI) {
     process.exit(1);
 }
 
-// **Conectar a MongoDB**
+// Conectar a MongoDB
 mongoose.connect(mongoURI)
     .then(() => console.log("✅ Conectado a MongoDB"))
     .catch(err => {
@@ -31,15 +33,17 @@ mongoose.connect(mongoURI)
         process.exit(1);
     });
 
-// **Rutas**
+// Rutas
 app.use("/api/wallets", walletRoutes);
 app.use("/api/users", userRoutes);
-app.use('/api/jobs', jobRoutes );
+app.use('/api/jobs', jobRoutes);
+app.use("/api/movimientos", movimientoRoutes);
 app.use("/api", dashboardRoutes);
 
-// **Iniciar servidor**
+// Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor en http://localhost:${PORT}`);
 });
+
 
 
