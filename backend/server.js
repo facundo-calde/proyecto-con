@@ -6,12 +6,13 @@ require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
 const walletRoutes = require("./routes/walletRoutes");
 const userRoutes = require("./routes/userRoutes");
-const jobRoutes = require('./routes/jobRoutes');
-const movimientoRoutes = require("./routes/movimientoRoutes"); // Asegúrate de incluir la ruta de movimientos
-const dashboardRoutes = require('./routes/dashboardRoutes');
+const jobRoutes = require("./routes/jobRoutes");
+const movimientoRoutes = require("./routes/movimientoRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const HOST = "0.0.0.0";
 const mongoURI = process.env.MONGO_URI;
 
 app.use(express.json());
@@ -19,30 +20,28 @@ app.use(cors());
 
 console.log("🔍 MONGO_URI:", mongoURI);
 console.log("🚀 Usando puerto:", PORT);
+console.log("🌐 Host:", HOST);
 
 if (!mongoURI) {
-    console.error("❌ ERROR: MONGO_URI no está definido en .env");
-    process.exit(1);
+  console.error("❌ ERROR: MONGO_URI no está definido en .env");
+  process.exit(1);
 }
 
-// Conectar a MongoDB
 mongoose.connect(mongoURI)
-    .then(() => console.log("✅ Conectado a MongoDB"))
-    .catch(err => {
-        console.error("❌ Error al conectar a MongoDB:", err);
-        process.exit(1);
-    });
+  .then(() => console.log("✅ Conectado a MongoDB"))
+  .catch(err => {
+    console.error("❌ Error al conectar a MongoDB:", err);
+    process.exit(1);
+  });
 
-// Rutas
 app.use("/api/wallets", walletRoutes);
 app.use("/api/users", userRoutes);
-app.use('/api/jobs', jobRoutes);
+app.use("/api/jobs", jobRoutes);
 app.use("/api/movimientos", movimientoRoutes);
 app.use("/api", dashboardRoutes);
 
-// Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor en http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Servidor en http://${HOST}:${PORT}`);
 });
 
 
