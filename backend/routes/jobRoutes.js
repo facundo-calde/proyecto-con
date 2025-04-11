@@ -1,15 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const jobController = require('../controllers/jobController');
+const verifyToken = require('../middlewares/verifyToken');
 
+// Aplicar el middleware a todas las rutas de este router
+router.use(verifyToken);
 
-// Definir rutas para los puestos de trabajo
-router.get('/', jobController.getAllJobs); // Obtener todos los puestos
-router.get('/:id', jobController.getJobById); // Obtener un puesto por ID
-router.post('/', jobController.createJob); // Crear un nuevo puesto con su caja de fichas
-router.put('/:id', jobController.updateJob); // Modificar un puesto
-router.delete('/:id', jobController.deleteJob); // Eliminar un puesto
+router.get('/', jobController.getAllJobs);
+router.get('/:id', jobController.getJobById);
+router.post('/', jobController.createJob);
+router.put('/:id', jobController.updateJob);
+router.delete('/:id', jobController.deleteJob);
 router.patch('/:id/movimiento', jobController.modificarFichasPorDelta);
-
+router.post('/recarga-administrativa', jobController.recargaAdministrativa);
 
 module.exports = router;
+
+
+

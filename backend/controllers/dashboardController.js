@@ -22,8 +22,6 @@ const construirFiltros = (query) => {
 };
 
 // GET Controllers
-// dashboardController.js
-
 exports.obtenerDepositos = async (req, res) => {
   try {
     const filtros = construirFiltros(req.query);
@@ -44,17 +42,21 @@ exports.obtenerDepositos = async (req, res) => {
   }
 };
 
-
 exports.obtenerGastos = async (req, res) => {
   try {
     const filtros = construirFiltros(req.query);
-    const gastos = await OfficeExpense.find(filtros).populate("usuario");
+    const gastos = await OfficeExpense.find(filtros)
+      .populate("usuario")
+      .populate("wallet", "nombre")
+      .populate("job", "name");
+
     res.json(gastos);
   } catch (error) {
     console.error("Error al obtener gastos:", error);
     res.status(500).json({ error: "Error al obtener gastos" });
   }
 };
+
 
 exports.obtenerPropinas = async (req, res) => {
   try {
@@ -141,7 +143,6 @@ exports.crearDeposito = async (req, res) => {
       return res.status(401).json({ error: "Usuario no autenticado" });
     }
 
-    // Actualizar saldo y movimientos en la wallet
     if (billeteraId) {
       const wallet = await Wallet.findById(billeteraId);
       if (!wallet) return res.status(404).json({ error: "Billetera no encontrada" });
@@ -156,12 +157,11 @@ exports.crearDeposito = async (req, res) => {
       await wallet.save();
     }
 
-    // Aquí incluimos wallet en el Bill
     const nuevoDeposito = new Bill({
       monto,
       fecha: fecha ? new Date(fecha) : new Date(),
       usuario,
-      wallet: billeteraId  // ← asignamos la referencia a la wallet
+      wallet: billeteraId
     });
     const depositoGuardado = await nuevoDeposito.save();
 
@@ -172,25 +172,50 @@ exports.crearDeposito = async (req, res) => {
   }
 };
 
-
 exports.crearGasto = async (req, res) => {
   try {
-    const { monto, descripcion, fecha } = req.body;
-    if (!monto || monto <= 0 || !descripcion) {
+    const { monto, descripcion, fecha, walletId } = req.body;
+    if (!monto || monto <= 0 || !descripcion || !walletId) {
       return res.status(400).json({ error: "Datos inválidos" });
     }
+
     const usuario = req.user ? req.user.id : null;
     if (!usuario) {
       return res.status(401).json({ error: "Usuario no autenticado" });
     }
-    const nuevoGasto = new OfficeExpense({ monto, descripcion, fecha: fecha ? new Date(fecha) : new Date(), usuario });
-    const gastoGuardado = await nuevoGasto.save();
-    return res.status(201).json(gastoGuardado);
+
+    const wallet = await Wallet.findById(walletId).populate("caja");
+    if (!wallet) return res.status(404).json({ error: "Billetera no encontrada" });
+
+    // Descontar el monto de la billetera
+    if (wallet.saldo < monto) return res.status(400).json({ error: "Saldo insuficiente en la billetera" });
+    wallet.saldo -= monto;
+    wallet.movimientos.push({
+      tipo: "salida",
+      monto,
+      detalle: descripcion,
+      fecha: fecha ? new Date(fecha) : new Date(),
+      usuario
+    });
+    await wallet.save();
+
+    const gasto = new OfficeExpense({
+      monto,
+      descripcion,
+      fecha: fecha ? new Date(fecha) : new Date(),
+      usuario,
+      wallet: wallet._id,
+      job: wallet.caja // ← guardar el puesto asociado a esa wallet
+    });
+
+    const guardado = await gasto.save();
+    res.status(201).json(guardado);
   } catch (error) {
     console.error("Error al crear gasto de oficina:", error);
-    return res.status(500).json({ error: "Error al crear gasto de oficina" });
+    res.status(500).json({ error: "Error al crear gasto de oficina" });
   }
 };
+
 
 exports.crearPropina = async (req, res) => {
   try {

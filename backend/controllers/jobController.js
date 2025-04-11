@@ -98,3 +98,27 @@ exports.modificarFichasPorDelta = async (req, res) => {
     }
   };
   
+  exports.recargaAdministrativa = async (req, res) => {
+    const { jobId, monto, detalle } = req.body;
+  
+    if (!jobId || typeof monto !== 'number' || !detalle?.trim()) {
+      return res.status(400).json({ message: "Datos inválidos para la recarga" });
+    }
+  
+    try {
+      const job = await Job.findById(jobId);
+      if (!job) return res.status(404).json({ message: "Puesto no encontrado" });
+  
+      job.fichas += monto;
+      await job.save();
+  
+      res.json({ message: "Recarga aplicada correctamente", fichasActuales: job.fichas });
+    } catch (error) {
+      console.error("❌ Error en recargaAdministrativa:", error);
+      res.status(500).json({ message: "Error en el servidor" });
+    }
+  };
+  
+  
+
+

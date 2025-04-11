@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const movimientoController = require('../controllers/movimientoController');
+const verifyToken = require('../middlewares/verifyToken');
 
-// Ruta para obtener los movimientos
-router.get("/", movimientoController.obtenerMovimientos); // Asegúrate de que esta ruta esté configurada correctamente
+// Aplicar middleware a todas las rutas del router
+router.use(verifyToken);
+
+router.get("/", movimientoController.obtenerMovimientos);
 
 module.exports = router;

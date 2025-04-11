@@ -2,21 +2,21 @@ const express = require("express");
 const router = express.Router();
 
 const {
-    crearDeposito,
-    crearGasto,
-    crearPropina,
-    crearMovimiento,
-    obtenerDepositos,
-    obtenerGastos,
-    obtenerPropinas,
-    obtenerTransferencias,
-    obtenerRecargas
-  } = require("../controllers/dashboardController");
-  
+  crearDeposito,
+  crearGasto,
+  crearPropina,
+  crearMovimiento,
+  obtenerDepositos,
+  obtenerGastos,
+  obtenerPropinas,
+  obtenerTransferencias,
+  obtenerRecargas
+} = require("../controllers/dashboardController");
 
-const { verificarToken } = require("../controllers/userController");
+const verifyToken = require("../middlewares/verifyToken");
 
-router.use(verificarToken); // Aplica a todo
+// Proteger todas las rutas del dashboard
+router.use(verifyToken);
 
 // POST - Crear registros
 router.post("/depositos", crearDeposito);
@@ -30,7 +30,6 @@ router.get("/gastos", obtenerGastos);
 router.get("/propinas", obtenerPropinas);
 router.get("/wallets/transferencias", obtenerTransferencias);
 router.get("/wallets/recargas-administrativas", obtenerRecargas);
-
 
 module.exports = router;
 

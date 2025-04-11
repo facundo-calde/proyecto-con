@@ -98,37 +98,6 @@ const transferirEntreBilleteras = async (req, res) => {
     }
 };
 
-//Recargas administrativas
-const recargaAdministrativa = async (req, res) => {
-    const { destino, monto, detalle } = req.body;
-  
-    if (!destino || !monto || monto <= 0) {
-      return res.status(400).json({ message: "Datos inválidos para recarga" });
-    }
-  
-    try {
-      const wallet = await Wallet.findById(destino);
-      if (!wallet) return res.status(404).json({ message: "Billetera no encontrada" });
-  
-      wallet.saldo += monto;
-  
-      wallet.movimientos = wallet.movimientos || [];
-      wallet.movimientos.push({
-        tipo: "entrada",
-        monto,
-        detalle: detalle || "Recarga administrativa",
-        fecha: new Date(),
-        usuario: req.user?.nombre || "Sistema"
-      });
-  
-      await wallet.save();
-      res.json({ message: "Recarga aplicada correctamente" });
-    } catch (error) {
-      console.error("❌ Error en recarga administrativa:", error);
-      res.status(500).json({ message: "Error en el servidor" });
-    }
-  };
-  
 
 // **Exportar todas las funciones correctamente**
 module.exports = {
@@ -136,7 +105,6 @@ module.exports = {
     crearWallet,
     eliminarWallet,
     transferirEntreBilleteras,
-    recargaAdministrativa
 };
 
 

@@ -1,6 +1,9 @@
-// reports.js completo con soporte para mostrar wallet y puesto en depósitos
+// reports.js
 
+let token;
 document.addEventListener("DOMContentLoaded", function () {
+    token = localStorage.getItem("token");
+
     const API_URLS = {
         billeteras: "http://localhost:5000/api/wallets",
         puestos: "http://localhost:5000/api/jobs",
@@ -12,37 +15,34 @@ document.addEventListener("DOMContentLoaded", function () {
         transferencias: "http://localhost:5000/api/wallets/transferencias",
         recargas: "http://localhost:5000/api/wallets/recargas-administrativas"
     };
-    const logoutBtn = document.querySelector(".logout"); // Capturar el botón de cerrar sesión
 
-    const token = localStorage.getItem("token");
-
-     // **Cerrar sesión (Eliminar token y caja seleccionada)**
-  logoutBtn.addEventListener("click", function (event) {
-    event.preventDefault();
-    console.log("🔍 Click en CERRAR SESIÓN");
-
-    Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "Se eliminará la sesión y serás redirigido a la página de inicio.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, salir",
-      cancelButtonText: "Cancelar"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        console.log("✅ Confirmación recibida, eliminando token...");
-        localStorage.removeItem("token"); // Eliminar el token del localStorage
-        localStorage.removeItem("cajaSeleccionada"); // Eliminar caja seleccionada
-        window.location.href = "index.html"; // Redirigir a index.html
-      }
-    });
-  });
-
+    const logoutBtn = document.querySelector(".logout");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            Swal.fire({
+                title: "¿Cerrar sesión?",
+                text: "Se eliminará la sesión y serás redirigido a la página de inicio.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, salir",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("cajaSeleccionada");
+                    window.location.href = "index.html";
+                }
+            });
+        });
+    }
 
     async function fetchData(url) {
         try {
             if (!token) throw new Error("Token no encontrado. Debes iniciar sesión.");
-            const response = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+            const response = await fetch(url, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
             const contentType = response.headers.get("content-type");
             if (!response.ok) {
                 const errorText = await response.text();
@@ -81,21 +81,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function cargarPuestos() {
-        try {
-            return await fetchData(API_URLS.puestos);
-        } catch (e) {
-            console.error("Error al cargar puestos", e);
-            return [];
-        }
+        return await fetchData(API_URLS.puestos);
     }
 
     async function cargarUsuarios() {
-        try {
-            return await fetchData(API_URLS.usuarios);
-        } catch (e) {
-            console.error("Error al cargar usuarios", e);
-            return [];
-        }
+        return await fetchData(API_URLS.usuarios);
     }
 
     function generarSweetAlertFiltro(titulo, callback) {
@@ -134,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderLista(idLista, datos, formatter) {
         const lista = document.getElementById(idLista);
+        if (!lista) return;
         lista.innerHTML = "";
         if (!datos.length) {
             lista.innerHTML = "<li>No hay datos disponibles.</li>";
@@ -166,8 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   <div><strong>Billetera:</strong> ${d.wallet?.nombre || 'N/A'}</div>
                   <div><strong>Puesto:</strong> ${d.wallet?.caja?.name || 'N/A'}</div>
                 `);
-              }
-               else {
+            } else {
                 renderLista(listaId, datos, d => `
                     <div><strong>Monto:</strong> ${d.monto || '-'} </div>
                     <div><strong>Descripción:</strong> ${d.descripcion || '-'} </div>
@@ -181,42 +171,44 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    document.getElementById("filtrosMovimientos").addEventListener("click", () => cargarSeccion(API_URLS.movimientos, "listaMovimientos", "Filtrar Movimientos"));
-    document.querySelector(".btnFiltroDepositos").addEventListener("click", () => cargarSeccion(API_URLS.depositos, "listaDepositos", "Filtrar Depósitos"));
-    document.querySelector(".btnFiltroPropinas").addEventListener("click", () => cargarSeccion(API_URLS.propinas, "listaPropinas", "Filtrar Propinas"));
-    document.querySelector(".btnFiltroGastos").addEventListener("click", () => cargarSeccion(API_URLS.gastos, "listaGastos", "Filtrar Gastos"));
-    document.querySelector(".btnFiltroRecargas").addEventListener("click", () => cargarSeccion(API_URLS.recargas, "listaRecargas", "Filtrar Recargas"));
+    const filtrosMovimientos = document.getElementById("filtrosMovimientos");
+    const btnFiltroDepositos = document.querySelector(".btnFiltroDepositos");
+    const btnFiltroPropinas = document.querySelector(".btnFiltroPropinas");
+    const btnFiltroGastos = document.querySelector(".btnFiltroGastos");
+    const btnFiltroRecargas = document.querySelector(".btnFiltroRecargas");
+    const btnImprimir = document.getElementById("btnImprimir");
 
-    document.getElementById("btnImprimir").addEventListener("click", function () {
-        const contenido = document.getElementById("listaMovimientos").innerHTML;
-        const ventana = window.open("", "PRINT", "height=600,width=800");
-        ventana.document.write(`
-            <html>
-                <head>
-                    <title>Reporte de Movimientos</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        .movimiento-card { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-                    </style>
-                </head>
-                <body>
-                    <h1>Reporte de Movimientos</h1>
-                    <ul style="list-style: none; padding: 0;">${contenido}</ul>
-                </body>
-            </html>
-        `);
-        ventana.document.close();
-        ventana.focus();
-        ventana.print();
-        ventana.close();
-    });
+    if (filtrosMovimientos) filtrosMovimientos.addEventListener("click", () => cargarSeccion(API_URLS.movimientos, "listaMovimientos", "Filtrar Movimientos"));
+    if (btnFiltroDepositos) btnFiltroDepositos.addEventListener("click", () => cargarSeccion(API_URLS.depositos, "listaDepositos", "Filtrar Depósitos"));
+    if (btnFiltroPropinas) btnFiltroPropinas.addEventListener("click", () => cargarSeccion(API_URLS.propinas, "listaPropinas", "Filtrar Propinas"));
+    if (btnFiltroGastos) btnFiltroGastos.addEventListener("click", () => cargarSeccion(API_URLS.gastos, "listaGastos", "Filtrar Gastos"));
+    if (btnFiltroRecargas) btnFiltroRecargas.addEventListener("click", () => cargarSeccion(API_URLS.recargas, "listaRecargas", "Filtrar Recargas"));
+
+    if (btnImprimir) {
+        btnImprimir.addEventListener("click", function () {
+            const contenido = document.getElementById("listaMovimientos").innerHTML;
+            const ventana = window.open("", "PRINT", "height=600,width=800");
+            ventana.document.write(`
+                <html>
+                    <head>
+                        <title>Reporte de Movimientos</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            .movimiento-card { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Reporte de Movimientos</h1>
+                        <ul style="list-style: none; padding: 0;">${contenido}</ul>
+                    </body>
+                </html>
+            `);
+            ventana.document.close();
+            ventana.focus();
+            ventana.print();
+            ventana.close();
+        });
+    }
 
     cargarBilleteras();
 });
-
-
-
-
-
-
-

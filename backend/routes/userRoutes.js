@@ -1,17 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
+const verifyToken = require("../middlewares/verifyToken");
 
-
-
-
-// **Rutas de Usuarios**
-router.get("/", userController.verificarToken, userController.obtenerUsuarios);
+// Rutas públicas (sin token)
 router.post("/", userController.crearUsuario);
 router.post("/login", userController.loginUsuario);
-router.patch('/:id/password', userController.verificarToken, userController.cambiarPassword);
-router.patch("/:id", userController.verificarToken, userController.cambiarEstadoUsuario);
 
-
+// Rutas protegidas
+router.get("/", verifyToken, userController.obtenerUsuarios);
+router.patch('/:id/password', verifyToken, userController.cambiarPassword);
+router.patch("/:id", verifyToken, userController.cambiarEstadoUsuario);
 
 module.exports = router;

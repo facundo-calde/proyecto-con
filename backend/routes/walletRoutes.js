@@ -4,20 +4,21 @@ const {
     obtenerWallets,
     crearWallet,
     eliminarWallet,
-    transferirEntreBilleteras,
-    recargaAdministrativa
+    transferirEntreBilleteras
 } = require("../controllers/walletController");
 
-const { verificarToken } = require("../controllers/userController");
+const verifyToken = require("../middlewares/verifyToken");
 
-// Rutas protegidas con token
-router.get("/", verificarToken, obtenerWallets);  // Obtener todas las billeteras
-router.post("/", verificarToken, crearWallet);   // Crear nueva billetera
-router.delete("/:id", verificarToken, eliminarWallet);  // Eliminar billetera, ahora sin walletController. 
-router.post("/recarga-administrativa", verificarToken, recargaAdministrativa);  // Recarga administrativa
-router.post("/transferencia", verificarToken, transferirEntreBilleteras);  // Transferir entre billeteras
+// Aplicar el middleware a todo el router
+router.use(verifyToken);
+
+router.get("/", obtenerWallets);                   // Obtener todas las billeteras
+router.post("/", crearWallet);                    // Crear nueva billetera
+router.delete("/:id", eliminarWallet);            // Eliminar billetera
+router.post("/transferencia", transferirEntreBilleteras); // Transferir entre billeteras
 
 module.exports = router;
+
 
 
 

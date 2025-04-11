@@ -1,27 +1,33 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const listaBilleteras = document.getElementById("listaBilleteras");
-  const usuarioSpan = document.querySelector(".textWhite strong"); // Capturar el elemento donde va el nombre
-  const logoutBtn = document.querySelector(".logout"); // Capturar el botón de cerrar sesión
-  const API_URL_BILLETERAS = "http://localhost:5000/api/wallets"; // Endpoint de billeteras
+// 🔐 TOKEN y ENDPOINTS GLOBALES
+const token = localStorage.getItem("token");
+const API_URL_BILLETERAS = "http://localhost:5000/api/wallets";
+const API_URL_DEPOSITOS = "http://localhost:5000/api/depositos";
+const API_URL_GASTOS = "http://localhost:5000/api/gastos";
 
-  // **Obtener el nombre del usuario desde el token**
-  function mostrarNombreUsuario() {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1])); // Decodificar JWT
-        console.log("🔍 Datos del usuario:", payload);
-        usuarioSpan.textContent = payload.nombre.toUpperCase(); // Mostrar el nombre en la navbar
-      } catch (error) {
-        console.error("❌ Error al decodificar el token:", error);
-        usuarioSpan.textContent = "USUARIO"; // Si hay error, dejar el texto por defecto
-      }
-    } else {
-      console.warn("⚠️ No se encontró un token en localStorage");
-      usuarioSpan.textContent = "USUARIO";
-    }
+// Función global para actualizar la cantidad de fichas
+async function cargarFichas() {
+  const puestoSeleccionado = localStorage.getItem("puestoSeleccionado");
+  if (!puestoSeleccionado) {
+    console.warn("No se encontró un puesto seleccionado");
+    return;
   }
+  try {
+    const response = await fetch(`http://localhost:5000/api/jobs/${puestoSeleccionado}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error al obtener el puesto:", errorData);
+      return;
+    }
+    const job = await response.json();
+    const cantidadFichas = job.fichas || 0;
+    const formattedFichas = cantidadFichas.toLocaleString("es-ES");
+    document.getElementById("cantidadFichas").textContent = formattedFichas;
+  } catch (error) {
+    console.error("Error en la solicitud:", error);
+  }
+}
 
   // **Obtener la billeteras
   async function cargarBilleteras() {
@@ -29,8 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("📌 Puesto seleccionado al cargar billeteras:", puestoSeleccionado);
 
     try {
-      const token = localStorage.getItem("token");
-
+      
       const response = await fetch(API_URL_BILLETERAS, {
         headers: {
           "Authorization": `Bearer ${token}`
@@ -65,6 +70,33 @@ document.addEventListener("DOMContentLoaded", function () {
       listaBilleteras.innerHTML = `<p>Error al cargar billeteras.</p>`;
     }
   }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const listaBilleteras = document.getElementById("listaBilleteras");
+  const usuarioSpan = document.querySelector(".textWhite strong"); // Capturar el elemento donde va el nombre
+  const logoutBtn = document.querySelector(".logout"); // Capturar el botón de cerrar sesión
+  
+
+  // **Obtener el nombre del usuario desde el token**
+  function mostrarNombreUsuario() {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1])); // Decodificar JWT
+        console.log("🔍 Datos del usuario:", payload);
+        usuarioSpan.textContent = payload.nombre.toUpperCase(); // Mostrar el nombre en la navbar
+      } catch (error) {
+        console.error("❌ Error al decodificar el token:", error);
+        usuarioSpan.textContent = "USUARIO"; // Si hay error, dejar el texto por defecto
+      }
+    } else {
+      console.warn("⚠️ No se encontró un token en localStorage");
+      usuarioSpan.textContent = "USUARIO";
+    }
+  }
+
+
 
   // **Cerrar sesión (Eliminar token y caja seleccionada)**
   logoutBtn.addEventListener("click", function (event) {
@@ -103,7 +135,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   try {
     // Obtener el job por ID
-    const response = await fetch(`http://localhost:5000/api/jobs/${puestoSeleccionado}`);
+    const response = await fetch(`http://localhost:5000/api/jobs/${puestoSeleccionado}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Error al obtener el puesto:", errorData);
@@ -123,17 +160,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-// URL de tus endpoints (ajusta según corresponda)
-const API_URL_DEPOSITOS = "http://localhost:5000/api/depositos";
-const API_URL_GASTOS = "http://localhost:5000/api/gastos";
-
 // Asumamos que el primer enlace "➕ Agregar" es para depósitos sin reclamar 
 const addLinks = document.querySelectorAll("a.add");
 
 addLinks[0].addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const token = localStorage.getItem("token");
   const res = await fetch("http://localhost:5000/api/wallets", {
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -192,6 +224,7 @@ addLinks[0].addEventListener("click", async (e) => {
 
       if (response.ok) {
         Swal.fire("✅ Éxito", "Depósito agregado correctamente", "success");
+        await cargarBilleteras(); // ← actualiza el saldo al instante
       } else {
         Swal.fire("❌ Error", "No se pudo agregar el depósito", "error");
       }
@@ -204,64 +237,100 @@ addLinks[0].addEventListener("click", async (e) => {
 
 
 
-// --- Gastos de oficina ---
+// --- Gastos de oficina (con billetera seleccionada) ---
 addLinks[1].addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const { value: formValues } = await Swal.fire({
-    title: "Agregar Gasto de Oficina",
-    html:
-      `<input type="number" id="swal-gasto-monto" class="swal2-input" placeholder="Monto">` +
-      `<input type="text" id="swal-gasto-descripcion" class="swal2-input" placeholder="Descripción">`,
-    focusConfirm: false,
-    preConfirm: () => {
-      const inputMonto = document.getElementById("swal-gasto-monto").value;
-      const descripcion = document.getElementById("swal-gasto-descripcion").value.trim();
-      const monto = parseFloat(inputMonto);
+  try {
+    // Obtener billeteras
+    const res = await fetch("http://localhost:5000/api/wallets", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
 
-      if (!monto || monto <= 0) {
-        Swal.showValidationMessage("Ingresa un monto válido");
-      }
-      if (!descripcion) {
-        Swal.showValidationMessage("Ingresa una descripción");
-      }
-      return { monto, descripcion };
+    const billeteras = await res.json();
+
+    if (!Array.isArray(billeteras) || billeteras.length === 0) {
+      return Swal.fire("⚠️", "No hay billeteras disponibles", "warning");
     }
-  });
 
-  if (formValues) {
-    // Preparar datos a enviar
+    // Opciones para el select
+    const billeteraOptions = billeteras
+      .map(b => `<option value="${b._id}">${b.nombre} (Saldo: $${b.saldo.toFixed(2)})</option>`)
+      .join("");
+
+    // Mostrar formulario con selección de billetera
+    const { value: formValues } = await Swal.fire({
+      title: "Agregar Gasto de Oficina",
+      html:
+        `<select id="swal-gasto-billetera" class="swal2-input">
+           <option value="">Seleccionar billetera</option>
+           ${billeteraOptions}
+         </select>` +
+        `<input type="number" id="swal-gasto-monto" class="swal2-input" placeholder="Monto">` +
+        `<input type="text" id="swal-gasto-descripcion" class="swal2-input" placeholder="Descripción">`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Guardar",
+      cancelButtonText: "Cancelar",
+      preConfirm: () => {
+        const walletId = document.getElementById("swal-gasto-billetera").value;
+        const inputMonto = document.getElementById("swal-gasto-monto").value;
+        const descripcion = document.getElementById("swal-gasto-descripcion").value.trim();
+        const monto = parseFloat(inputMonto);
+
+        if (!walletId) {
+          Swal.showValidationMessage("Seleccioná una billetera");
+          return false;
+        }
+
+        if (!monto || monto <= 0) {
+          Swal.showValidationMessage("Ingresá un monto válido");
+          return false;
+        }
+
+        if (!descripcion) {
+          Swal.showValidationMessage("Ingresá una descripción");
+          return false;
+        }
+
+        return { walletId, monto, descripcion };
+      }
+    });
+
+    if (!formValues) return;
+
+    // Armar el objeto a enviar
     const data = {
+      walletId: formValues.walletId,
       monto: formValues.monto,
       descripcion: formValues.descripcion,
       fecha: new Date()
     };
 
-    // Obtener token del localStorage
-    const token = localStorage.getItem("token");
+    // Enviar al backend
+    const response = await fetch(API_URL_GASTOS, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    });
 
-    try {
-      const response = await fetch(API_URL_GASTOS, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // Agregar token aquí
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (response.ok) {
-        Swal.fire("Éxito", "Gasto agregado correctamente", "success");
-        // Actualizar la interfaz si es necesario
-      } else {
-        Swal.fire("Error", "No se pudo agregar el gasto", "error");
-      }
-    } catch (error) {
-      console.error("Error en la solicitud:", error);
-      Swal.fire("Error", "Error en la solicitud", "error");
+    if (response.ok) {
+      Swal.fire("✅ Gasto registrado", "Se descontó de la billetera elegida", "success");
+      await cargarBilleteras();
+    } else {
+      const errorData = await response.json();
+      Swal.fire("❌ Error", errorData.message || "No se pudo guardar", "error");
     }
+
+  } catch (error) {
+    console.error("❌ Error:", error);
+    Swal.fire("❌ Error", "No se pudo completar la operación", "error");
   }
 });
+
 
 // --- Propinas ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -307,7 +376,6 @@ document.addEventListener("DOMContentLoaded", () => {
       fecha: new Date()
     };
 
-    const token = localStorage.getItem("token");
 
     try {
       Swal.fire({ title: "Guardando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -338,8 +406,6 @@ document.addEventListener("DOMContentLoaded", () => {
 addLinks[2].addEventListener("click", async (e) => {
   e.preventDefault();
   console.log("🟡 Click en Agregar Movimiento de fichas");
-
-  const token = localStorage.getItem("token");
   const jobId = localStorage.getItem("puestoSeleccionado");
 
   if (!token || !jobId) {
@@ -401,6 +467,8 @@ addLinks[2].addEventListener("click", async (e) => {
 
       if (response.ok) {
         Swal.fire("Éxito", "Movimiento registrado correctamente", "success");
+        await cargarBilleteras();
+        await cargarFichas();
       } else {
         const errorData = await response.json();
         Swal.fire("Error", errorData.error || "Error al guardar", "error");
@@ -453,7 +521,7 @@ if (!changePasswordLink) {
     if (!formValues) return;
 
     const { oldPassword, newPassword } = formValues;
-    const token = localStorage.getItem("token");
+
 
     if (!token) {
       return Swal.fire("Error", "No se encontró el token. Iniciá sesión nuevamente.", "error");
@@ -502,8 +570,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ Click detectado en ➕ Agregar transferencia");
 
     try {
-      const token = localStorage.getItem("token");
-
       const response = await fetch("http://localhost:5000/api/wallets", {
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -572,6 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (movResponse.ok) {
         Swal.fire("✅ Transferencia realizada", "", "success");
+        await cargarBilleteras();
       } else {
         Swal.fire("❌ Error", data.message || "No se pudo realizar la transferencia", "error");
       }
@@ -582,7 +649,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
 document.addEventListener("DOMContentLoaded", () => {
   const botonRecarga = document.querySelector(".add-administrativas");
 
@@ -596,57 +662,62 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ Click en ➕ Agregar Recarga Administrativa");
 
     try {
-      const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/api/wallets", {
+      // Traemos los puestos (jobs)
+      const response = await fetch("http://localhost:5000/api/jobs", {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
-      const wallets = await response.json();
+      const jobs = await response.json();
 
-      if (!Array.isArray(wallets) || wallets.length === 0) {
-        return Swal.fire("⚠️", "No hay billeteras disponibles", "warning");
+      if (!Array.isArray(jobs) || jobs.length === 0) {
+        return Swal.fire("⚠️", "No hay puestos disponibles", "warning");
       }
 
-      const options = wallets
-        .map(w => `<option value="${w._id}">${w.nombre} (Saldo: ${w.saldo})</option>`)
+      const options = jobs
+        .map(j => `<option value="${j._id}">${j.name} (Fichas: ${j.fichas})</option>`)
         .join("");
 
       const { value: formValues } = await Swal.fire({
         title: "Recarga Administrativa",
         html: `
-          <select id="walletDestino" class="swal2-input">${options}</select>
-          <input id="monto" type="number" class="swal2-input" placeholder="Monto a cargar">
-          <input id="detalle" type="text" class="swal2-input" placeholder="Detalle (opcional)">
+          <select id="jobDestino" class="swal2-input">${options}</select>
+          <input id="monto" type="number" class="swal2-input" placeholder="Monto a cargar (+ o -)">
+          <input id="detalle" type="text" class="swal2-input" placeholder="Detalle (obligatorio)">
         `,
         focusConfirm: false,
         showCancelButton: true,
-        confirmButtonText: "Cargar",
+        confirmButtonText: "Aplicar",
         cancelButtonText: "Cancelar",
         preConfirm: () => {
-          const destino = document.getElementById("walletDestino").value;
+          const jobId = document.getElementById("jobDestino").value;
           const monto = parseFloat(document.getElementById("monto").value);
           const detalle = document.getElementById("detalle").value.trim();
 
-          if (!destino) {
-            Swal.showValidationMessage("Seleccioná una billetera");
+          if (!jobId) {
+            Swal.showValidationMessage("Seleccioná un puesto");
             return false;
           }
 
-          if (isNaN(monto) || monto <= 0) {
-            Swal.showValidationMessage("Ingresá un monto válido");
+          if (isNaN(monto) || monto === 0) {
+            Swal.showValidationMessage("Ingresá un monto válido (positivo o negativo)");
             return false;
           }
 
-          return { destino, monto, detalle };
+          if (!detalle) {
+            Swal.showValidationMessage("El detalle es obligatorio");
+            return false;
+          }
+
+          return { jobId, monto, detalle };
         }
       });
 
       if (!formValues) return;
 
-      Swal.fire({ title: "Cargando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      Swal.fire({ title: "Procesando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const recargaResponse = await fetch("http://localhost:5000/api/wallets/recarga-administrativa", {
+      const recargaResponse = await fetch("http://localhost:5000/api/jobs/recarga-administrativa", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -659,6 +730,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (recargaResponse.ok) {
         Swal.fire("✅ Recarga aplicada", "", "success");
+        await cargarFichas();
       } else {
         Swal.fire("❌ Error", data.message || "No se pudo aplicar la recarga", "error");
       }
@@ -669,3 +741,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+

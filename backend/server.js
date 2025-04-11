@@ -10,6 +10,8 @@ const jobRoutes = require("./routes/jobRoutes");
 const movimientoRoutes = require("./routes/movimientoRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
+const verifyToken = require("./middlewares/verifyToken"); // <-- 👈 IMPORTANTE
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const HOST = "0.0.0.0";
@@ -34,11 +36,14 @@ mongoose.connect(mongoURI)
     process.exit(1);
   });
 
-app.use("/api/wallets", walletRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/jobs", jobRoutes);
-app.use("/api/movimientos", movimientoRoutes);
-app.use("/api", dashboardRoutes);
+// 🔓 Rutas públicas (sin token)
+app.use("/api/users", userRoutes); // login, registro, etc.
+
+// 🔒 Rutas protegidas
+app.use("/api/wallets", verifyToken, walletRoutes);
+app.use("/api/jobs", verifyToken, jobRoutes);
+app.use("/api/movimientos", verifyToken, movimientoRoutes);
+app.use("/api", verifyToken, dashboardRoutes); // Si querés que todo /api/* esté protegido
 
 app.listen(PORT, HOST, () => {
   console.log(`🚀 Servidor en http://${HOST}:${PORT}`);
