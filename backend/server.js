@@ -19,6 +19,9 @@ const mongoURI = process.env.MONGO_URI;
 
 app.use(express.json());
 app.use(cors());
+const frontendPath = path.join(__dirname, "../frontend");
+app.use(express.static(frontendPath));
+
 
 console.log("🔍 MONGO_URI:", mongoURI);
 console.log("🚀 Usando puerto:", PORT);
