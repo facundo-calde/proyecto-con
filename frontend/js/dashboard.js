@@ -1,8 +1,10 @@
+import { API_ENDPOINTS } from "./config.js";
+
 // 🔐 TOKEN y ENDPOINTS GLOBALES
 const token = localStorage.getItem("token");
-const API_URL_BILLETERAS = "http://localhost:5000/api/wallets";
-const API_URL_DEPOSITOS = "http://localhost:5000/api/depositos";
-const API_URL_GASTOS = "http://localhost:5000/api/gastos";
+const API_URL_BILLETERAS = API_ENDPOINTS.billeteras;
+const API_URL_DEPOSITOS = API_ENDPOINTS.depositos;
+const API_URL_GASTOS = API_ENDPOINTS.gastos;
 
 // Función global para actualizar la cantidad de fichas
 async function cargarFichas() {
@@ -12,7 +14,7 @@ async function cargarFichas() {
     return;
   }
   try {
-    const response = await fetch(`http://localhost:5000/api/jobs/${puestoSeleccionado}`, {
+    const response = await fetch(`API_ENDPOINTS.jobs/${puestoSeleccionado}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
@@ -135,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   try {
     // Obtener el job por ID
-    const response = await fetch(`http://localhost:5000/api/jobs/${puestoSeleccionado}`, {
+    const response = await fetch(`API_ENDPOINTS.jobs/${puestoSeleccionado}`, {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -166,7 +168,7 @@ const addLinks = document.querySelectorAll("a.add");
 addLinks[0].addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const res = await fetch("http://localhost:5000/api/wallets", {
+  const res = await fetch(API_ENDPOINTS.billeteras, {
     headers: { "Authorization": `Bearer ${token}` }
   });
 
@@ -213,7 +215,7 @@ addLinks[0].addEventListener("click", async (e) => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/depositos", {
+      const response = await fetch(API_ENDPOINTS.depositos, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -243,7 +245,7 @@ addLinks[1].addEventListener("click", async (e) => {
 
   try {
     // Obtener billeteras
-    const res = await fetch("http://localhost:5000/api/wallets", {
+    const res = await fetch(API_ENDPOINTS.billeteras, {
       headers: { "Authorization": `Bearer ${token}` }
     });
 
@@ -380,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       Swal.fire({ title: "Guardando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const response = await fetch("http://localhost:5000/api/propinas", {
+      const response = await fetch(API_ENDPOINTS.propinas, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -414,7 +416,7 @@ addLinks[2].addEventListener("click", async (e) => {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/wallets", {
+    const res = await fetch(API_ENDPOINTS.billeteras, {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -456,7 +458,7 @@ addLinks[2].addEventListener("click", async (e) => {
         jobId
       };
 
-      const response = await fetch("http://localhost:5000/api/movimientos", {
+      const response = await fetch(API_ENDPOINTS.movimientos, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -533,7 +535,7 @@ if (!changePasswordLink) {
     try {
       Swal.fire({ title: "Validando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const response = await fetch(`http://localhost:5000/api/users/${userId}/password`, {
+      const response = await fetch(`API_ENDPOINTS.users/${userId}/password`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -570,7 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ Click detectado en ➕ Agregar transferencia");
 
     try {
-      const response = await fetch("http://localhost:5000/api/wallets", {
+      const response = await fetch(API_ENDPOINTS.billeteras, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -625,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       Swal.fire({ title: "Procesando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const movResponse = await fetch("http://localhost:5000/api/wallets/transferencia", {
+      const movResponse = await fetch("API_ENDPOINTS.billeteras/transferencia", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -664,7 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
 
       // Traemos los puestos (jobs)
-      const response = await fetch("http://localhost:5000/api/jobs", {
+      const response = await fetch(API_ENDPOINTS.jobs, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -717,7 +719,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       Swal.fire({ title: "Procesando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const recargaResponse = await fetch("http://localhost:5000/api/jobs/recarga-administrativa", {
+      const recargaResponse = await fetch(`${API_ENDPOINTS.jobs}/recarga-administrativa`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

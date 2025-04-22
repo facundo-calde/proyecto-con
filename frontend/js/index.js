@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from "./config.js";
+
 function getToken() {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -24,11 +26,12 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       Swal.fire({ title: "Verificando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const response = await fetch("http://localhost:5000/api/users/login", {
+      const response = await fetch(`${API_ENDPOINTS.users}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, password })
       });
+      
 
       const data = await response.json();
       console.log("📥 Respuesta del servidor:", data); // 🔍 Ver la respuesta en la consola
@@ -67,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function seleccionarCaja() {
     try {
       const token = getToken(); // ✅ Token desde helper
-      const response = await fetch("http://localhost:5000/api/jobs", {
+      const response = await fetch(API_ENDPOINTS.jobs, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 

@@ -1,11 +1,13 @@
+import { API_ENDPOINTS } from "./config.js";
+
 const token = localStorage.getItem("token");
 document.addEventListener("DOMContentLoaded", function () {
   console.log("✅ DOM completamente cargado");
 
   // **CONFIGURACIÓN** - Estas variables serán visibles en este bloque
-  const API_WALLETS = "http://localhost:5000/api/wallets";
-  const API_USERS = "http://localhost:5000/api/users";
-  const API_JOBS = "http://localhost:5000/api/jobs";
+  const API_WALLETS = API_ENDPOINTS.billeteras;
+  const API_USERS = API_ENDPOINTS.users;
+  const API_JOBS = API_ENDPOINTS.jobs;
 
 
   const usuarioSpan = document.querySelector(".textWhite strong");
@@ -265,7 +267,7 @@ async function modificarPuesto() {
     event.preventDefault();
     try {
       // Obtener todos los puestos de trabajo desde el backend
-      const response = await fetch("http://localhost:5000/api/jobs", {
+      const response = await fetch(API_ENDPOINTS.jobs, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -321,7 +323,7 @@ async function modificarPuesto() {
 
       const { selectedJobId, newFichas } = formValues;
 
-      const updateResponse = await fetch(`http://localhost:5000/api/jobs/${selectedJobId}/movimiento`, {
+      const updateResponse = await fetch(`API_ENDPOINTS.jobs/${selectedJobId}/movimiento`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -397,7 +399,7 @@ if (!changePasswordLink) {
     try {
       Swal.fire({ title: "Validando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const response = await fetch(`http://localhost:5000/api/users/${userId}/password`, {
+      const response = await fetch(`API_ENDPOINTS.users/${userId}/password`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -433,7 +435,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/wallets", {
+      const response = await fetch(API_ENDPOINTS.billeteras, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -481,7 +483,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       if (confirmDelete.isConfirmed) {
         // Realizar la solicitud para eliminar la billetera
-        const deleteResponse = await fetch(`http://localhost:5000/api/wallets/${walletToDelete}`, {
+        const deleteResponse = await fetch(`API_ENDPOINTS.billeteras/${walletToDelete}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -518,7 +520,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     try {
       // Obtener los usuarios desde el backend
-      const response = await fetch("http://localhost:5000/api/users", {
+      const response = await fetch(API_ENDPOINTS.users, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -575,7 +577,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       if (confirmModify.isConfirmed) {
         // Realizar la solicitud para cambiar el estado del usuario
-        const modifyResponse = await fetch(`http://localhost:5000/api/users/${userToModify}`, {
+        const modifyResponse = await fetch(`API_ENDPOINTS.users/${userToModify}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -620,7 +622,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/wallets", {
+      const response = await fetch(API_ENDPOINTS.billeteras, {
         headers: {
           "Content-Type": "application/json", // 👈 esto faltaba
           "Authorization": `Bearer ${token}`
@@ -662,7 +664,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelector('.delete-job')?.addEventListener('click', async () => {
     try {
       // 1. Obtener todos los puestos
-      const res = await fetch("http://localhost:5000/api/jobs", {
+      const res = await fetch(API_ENDPOINTS.jobs, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -704,7 +706,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!confirm.isConfirmed) return;
 
       // 3. Eliminar puesto
-      const delRes = await fetch(`http://localhost:5000/api/jobs/${selectedId}`,{
+      const delRes = await fetch(`API_ENDPOINTS.jobs/${selectedId}`,{
         method: 'DELETE',
         headers: {
           "Authorization": `Bearer ${token}`

@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from "./config.js";
+
 // reports.js
 
 let token;
@@ -5,15 +7,15 @@ document.addEventListener("DOMContentLoaded", function () {
     token = localStorage.getItem("token");
 
     const API_URLS = {
-        billeteras: "http://localhost:5000/api/wallets",
-        puestos: "http://localhost:5000/api/jobs",
-        usuarios: "http://localhost:5000/api/users",
-        movimientos: "http://localhost:5000/api/movimientos",
-        depositos: "http://localhost:5000/api/depositos",
-        propinas: "http://localhost:5000/api/propinas",
-        gastos: "http://localhost:5000/api/gastos",
-        transferencias: "http://localhost:5000/api/wallets/transferencias",
-        recargas: "http://localhost:5000/api/wallets/recargas-administrativas"
+        billeteras: API_ENDPOINTS.billeteras,
+        puestos: API_ENDPOINTS.jobs,
+        usuarios: API_ENDPOINTS.users,
+        movimientos: API_ENDPOINTS.movimientos,
+        depositos: API_ENDPOINTS.depositos,
+        propinas: API_ENDPOINTS.propinas,
+        gastos: API_ENDPOINTS.gastos,
+        transferencias: "API_ENDPOINTS.billeteras/transferencias",
+        recargas: "API_ENDPOINTS.billeteras/recargas-administrativas"
     };
 
     const logoutBtn = document.querySelector(".logout");
