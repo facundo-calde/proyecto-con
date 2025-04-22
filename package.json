@@ -1,4 +1,14 @@
 {
+  "name": "proyecto-concord",
+  "version": "1.0.0",
+  "scripts": {
+    "start-pm2": "pm2 start ecosystem.config.js",
+    "restart-pm2": "pm2 restart proyecto-concord",
+    "stop-pm2": "pm2 stop proyecto-concord",
+    "logs-pm2": "pm2 logs proyecto-concord",
+    "save-pm2": "pm2 save",
+    "startup-pm2": "pm2 startup"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
