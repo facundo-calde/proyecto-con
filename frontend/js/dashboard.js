@@ -5,6 +5,9 @@ const token = localStorage.getItem("token");
 const API_URL_BILLETERAS = API_ENDPOINTS.billeteras;
 const API_URL_DEPOSITOS = API_ENDPOINTS.depositos;
 const API_URL_GASTOS = API_ENDPOINTS.gastos;
+const payload = JSON.parse(atob(token.split(".")[1]));
+const usuarioId = payload.id;
+
 
 // Función global para actualizar la cantidad de fichas
 async function cargarFichas() {
@@ -14,7 +17,7 @@ async function cargarFichas() {
     return;
   }
   try {
-    const response = await fetch(`API_ENDPOINTS.jobs/${puestoSeleccionado}`, {
+    const response = await fetch(`${API_ENDPOINTS.jobs}/${puestoSeleccionado}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
@@ -125,6 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // **Ejecutar funciones al cargar la página**
   mostrarNombreUsuario();
   cargarBilleteras();
+  cargarMovimientosDelDia();
 });
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -137,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   try {
     // Obtener el job por ID
-    const response = await fetch(`API_ENDPOINTS.jobs/${puestoSeleccionado}`, {
+    const response = await fetch(`${API_ENDPOINTS.jobs}/${puestoSeleccionado}`, {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -483,6 +487,59 @@ addLinks[2].addEventListener("click", async (e) => {
   }
 });
 
+async function cargarMovimientosDelDia() {
+  const hoy = new Date();
+  const inicio = new Date(hoy.setHours(0, 0, 0, 0)).toISOString();
+  const fin = new Date(hoy.setHours(23, 59, 59, 999)).toISOString();
+
+  // Obtener el ID del usuario desde el token
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  const usuarioId = payload.id;
+
+  try {
+    const response = await fetch(`${API_ENDPOINTS.movimientos}?startDate=${inicio}&endDate=${fin}&usuario=${usuarioId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const movimientos = await response.json();
+
+    const lista = document.getElementById("movimientosDia");
+    if (!lista) {
+      console.error("❌ No se encontró el elemento #movimientosDia");
+      return;
+    }
+
+    lista.innerHTML = "";
+
+    if (!movimientos.length) {
+      lista.innerHTML = "<li>No hay movimientos hoy.</li>";
+      return;
+    }
+
+    movimientos.forEach(m => {
+      const li = document.createElement("li");
+      li.classList.add("movimiento-card");
+
+      const descripcion = m.descripcion || "Sin descripción";
+      const monto = `$${(m.monto || 0).toFixed(2)}`;
+      const hora = new Date(m.fecha).toLocaleTimeString();
+      const billetera = m.wallet?.nombre || "Billetera desconocida";
+
+      li.innerHTML = `
+        <strong>${descripcion}</strong> - ${monto} 
+        <br><small>${hora} - <em>${billetera}</em></small>
+      `;
+      lista.appendChild(li);
+    });
+  } catch (error) {
+    console.error("❌ Error al cargar movimientos del día:", error);
+  }
+}
+
+
+
+
+
 //Cambiar conttraseña
 const changePasswordLink = document.querySelector(".changePassword");
 
@@ -535,7 +592,7 @@ if (!changePasswordLink) {
     try {
       Swal.fire({ title: "Validando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const response = await fetch(`API_ENDPOINTS.users/${userId}/password`, {
+      const response = await fetch(`${API_ENDPOINTS.users}/${userId}/password`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -627,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       Swal.fire({ title: "Procesando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const movResponse = await fetch("API_ENDPOINTS.billeteras/transferencia", {
+      const movResponse = await fetch(`${API_ENDPOINTS.transferencia}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
