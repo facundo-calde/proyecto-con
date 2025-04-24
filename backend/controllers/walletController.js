@@ -98,6 +98,43 @@ const transferirEntreBilleteras = async (req, res) => {
     }
 };
 
+//modificar billetera
+// Modificar el saldo de una wallet (sumar o restar)
+const modificarSaldoWallet = async (req, res) => {
+    const { id } = req.params;
+    const { monto, descripcion } = req.body;
+  
+    if (typeof monto !== "number") {
+      return res.status(400).json({ message: "El monto debe ser un número" });
+    }
+  
+    try {
+      const wallet = await Wallet.findById(id);
+      if (!wallet) {
+        return res.status(404).json({ message: "Billetera no encontrada" });
+      }
+  
+      // Sumar o restar el monto
+      wallet.saldo += monto;
+  
+      // Registrar movimiento (opcional)
+      wallet.movimientos = wallet.movimientos || [];
+      wallet.movimientos.push({
+        tipo: monto >= 0 ? "entrada" : "salida",
+        monto: Math.abs(monto),
+        detalle: descripcion || "Modificación manual",
+        fecha: new Date(),
+        usuario: req.user?.nombre || "Sistema"
+      });
+  
+      await wallet.save();
+  
+      res.json({ message: "Saldo modificado correctamente", wallet });
+    } catch (error) {
+      console.error("❌ Error al modificar el saldo:", error);
+      res.status(500).json({ message: "Error al modificar el saldo" });
+    }
+  };
 
 // **Exportar todas las funciones correctamente**
 module.exports = {
@@ -105,6 +142,7 @@ module.exports = {
     crearWallet,
     eliminarWallet,
     transferirEntreBilleteras,
+    modificarSaldoWallet,
 };
 
 

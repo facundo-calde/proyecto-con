@@ -519,7 +519,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     e.preventDefault();
 
     try {
-      // Obtener los usuarios desde el backend
       const response = await fetch(API_ENDPOINTS.users, {
         method: "GET",
         headers: {
@@ -534,75 +533,117 @@ document.addEventListener("DOMContentLoaded", async function () {
         return Swal.fire("⚠️", "No hay usuarios para modificar", "warning");
       }
 
-      // Crear opciones para el select
       const options = users.map(user =>
         `<option value="${user._id}" data-estado="${user.estado}">${user.nombre} (${user.rol}) - ${user.estado ? "Activo" : "Inactivo"}</option>`
       ).join("");
 
-      // Mostrar SweetAlert con un select para elegir el usuario a modificar
-      const { value: userToModify } = await Swal.fire({
-        title: "Seleccionar Usuario para Modificar Estado",
-        html: ` 
-          <select id="user-select" class="swal2-input">
-            ${options}
+      const result = await Swal.fire({
+        title: "Modificar o Eliminar Usuario",
+        html: `
+          <select id="user-select" class="swal2-input">${options}</select>
+          <input type="password" id="new-password" class="swal2-input" placeholder="Nueva contraseña (opcional)">
+          <label class="swal2-label">Estado:</label>
+          <select id="estado-select" class="swal2-input">
+            <option value="true">Activo</option>
+            <option value="false">Inactivo</option>
           </select>
         `,
         focusConfirm: false,
         showCancelButton: true,
-        confirmButtonText: "Modificar",
+        showDenyButton: true,
+        confirmButtonText: "Guardar cambios",
+        denyButtonText: "🗑 Eliminar usuario",
         cancelButtonText: "Cancelar",
         preConfirm: () => {
-          return document.getElementById("user-select").value;
+          return {
+            id: document.getElementById("user-select").value,
+            nuevaPassword: document.getElementById("new-password").value,
+            nuevoEstado: document.getElementById("estado-select").value === "true"
+          };
         }
       });
 
-      if (!userToModify) return;
+      // 🗑 Eliminar usuario
+      if (result.isDenied) {
+        const selectedId = document.getElementById("user-select").value;
+        const selectedUser = users.find(user => user._id === selectedId);
 
-      // Obtener el estado actual del usuario seleccionado
-      const selectedUser = users.find(user => user._id === userToModify);
-      const estadoUsuario = selectedUser.estado ? "Inactivo" : "Activo"; // Cambiar según el estado
+        if (!selectedUser) {
+          return Swal.fire("❌ Error", "Usuario no encontrado", "error");
+        }
 
-      // Cambiar el texto del botón dependiendo del estado
-      const confirmText = selectedUser.estado ? "Marcar como Inactivo" : "Marcar como Activo";
-
-      // Confirmación de modificación del estado
-      const confirmModify = await Swal.fire({
-        title: `Cambiar Estado del Usuario: ${selectedUser.nombre}`,
-        text: `¿Estás seguro de que quieres cambiar el estado de este usuario a ${estadoUsuario}?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: confirmText,
-        cancelButtonText: "Cancelar"
-      });
-
-      if (confirmModify.isConfirmed) {
-        // Realizar la solicitud para cambiar el estado del usuario
-        const modifyResponse = await fetch(`API_ENDPOINTS.users/${userToModify}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            estado: !selectedUser.estado // Cambiar el estado (si estaba activo lo pone inactivo, y viceversa)
-          })
+        const confirmDelete = await Swal.fire({
+          title: "¿Estás seguro?",
+          text: `¿Querés eliminar a ${selectedUser.nombre}? Esta acción es irreversible.`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar"
         });
 
-        const modifyData = await modifyResponse.json();
+        if (confirmDelete.isConfirmed) {
+          const deleteResponse = await fetch(`${API_ENDPOINTS.users}/${selectedUser._id}`, {
+            method: "DELETE",
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
 
-        if (modifyResponse.ok) {
-          Swal.fire("✅ Estado modificado", "", "success");
-          // Opcional: Actualiza la interfaz si el estado cambia
-        } else {
-          Swal.fire("❌ Error", modifyData.message || "No se pudo modificar el estado del usuario", "error");
+          if (!deleteResponse.ok) {
+            const errorText = await deleteResponse.text();
+            return Swal.fire("❌ Error", errorText || "No se pudo eliminar el usuario", "error");
+          }
+
+          Swal.fire("✅ Usuario eliminado correctamente", "", "success");
         }
+
+        return;
       }
+
+      // ✏️ Modificar usuario
+      const datosFormulario = result.value;
+      if (!datosFormulario) return;
+
+      const selectedUser = users.find(user => user._id === datosFormulario.id);
+      if (!selectedUser) return Swal.fire("❌", "Usuario no encontrado", "error");
+
+      const cambios = {};
+      if (datosFormulario.nuevaPassword.trim() !== "") {
+        cambios.password = datosFormulario.nuevaPassword;
+      }
+
+      if (selectedUser.estado !== datosFormulario.nuevoEstado) {
+        cambios.estado = datosFormulario.nuevoEstado;
+      }
+
+      if (Object.keys(cambios).length === 0) {
+        return Swal.fire("⚠️", "No realizaste ningún cambio", "info");
+      }
+
+      const modifyResponse = await fetch(`${API_ENDPOINTS.users}/${selectedUser._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(cambios)
+      });
+
+      if (!modifyResponse.ok) {
+        const errorText = await modifyResponse.text();
+        return Swal.fire("❌ Error", errorText || "No se pudo modificar el usuario", "error");
+      }
+
+      Swal.fire("✅ Usuario actualizado correctamente", "", "success");
+
     } catch (err) {
       console.error("❌ Error:", err);
       Swal.fire("❌ Error", "No se pudo conectar con el servidor", "error");
     }
   });
 });
+
+
 
 
 // **Obtener todas las billeteras**
@@ -729,6 +770,97 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Llamamos a la función al cargar la página
   cargarBilleteras();
+});
+
+//modificar billeteras
+document.addEventListener("DOMContentLoaded", function () {
+  const btnModificarWallet = document.querySelector(".modifyWallet");
+
+  if (!btnModificarWallet) {
+    console.error("❌ No se encontró el botón .modifyWallet");
+    return;
+  }
+
+  btnModificarWallet.addEventListener("click", async function (e) {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(API_ENDPOINTS.billeteras, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      const wallets = await response.json();
+
+      if (!Array.isArray(wallets) || wallets.length === 0) {
+        return Swal.fire("⚠️", "No hay billeteras para modificar", "warning");
+      }
+
+      const options = wallets.map(w =>
+        `<option value="${w._id}">${w.nombre} (Saldo: $${w.saldo.toFixed(2)})</option>`
+      ).join("");
+
+      const { value: formValues } = await Swal.fire({
+        title: "Modificar Saldo de Billetera",
+        html: `
+          <select id="wallet-select" class="swal2-input">${options}</select>
+          <input id="wallet-monto" type="number" step="0.01" class="swal2-input" placeholder="Monto (+ o -)">
+          <input id="wallet-descripcion" class="swal2-input" placeholder="Descripción del cambio">
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Aplicar cambio",
+        cancelButtonText: "Cancelar",
+        focusConfirm: false,
+        preConfirm: () => {
+          const id = document.getElementById("wallet-select").value;
+          const monto = parseFloat(document.getElementById("wallet-monto").value);
+          const descripcion = document.getElementById("wallet-descripcion").value.trim();
+
+          if (!id) {
+            Swal.showValidationMessage("Debés seleccionar una billetera");
+            return false;
+          }
+          if (isNaN(monto)) {
+            Swal.showValidationMessage("El monto debe ser numérico");
+            return false;
+          }
+
+          return { id, monto, descripcion };
+        }
+      });
+
+      if (!formValues) return;
+
+      const { id, monto, descripcion } = formValues;
+
+      const modifyResponse = await fetch(`${API_ENDPOINTS.billeteras}/${id}/movimiento`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ monto, descripcion })
+      });
+
+      const result = await modifyResponse.json();
+
+      if (modifyResponse.ok) {
+        Swal.fire("✅ Saldo actualizado correctamente", "", "success");
+
+        // Recargar billeteras si hay función declarada
+        if (typeof cargarBilleteras === "function") {
+          cargarBilleteras();
+        }
+      } else {
+        Swal.fire("❌ Error", result.message || "No se pudo modificar el saldo", "error");
+      }
+
+    } catch (error) {
+      console.error("❌ Error al modificar saldo:", error);
+      Swal.fire("❌ Error", "No se pudo conectar con el servidor", "error");
+    }
+  });
 });
 
 

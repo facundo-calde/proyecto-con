@@ -4,7 +4,8 @@ const {
     obtenerWallets,
     crearWallet,
     eliminarWallet,
-    transferirEntreBilleteras
+    transferirEntreBilleteras,
+    modificarSaldoWallet
 } = require("../controllers/walletController");
 
 const verifyToken = require("../middlewares/verifyToken");
@@ -16,6 +17,8 @@ router.get("/", obtenerWallets);                   // Obtener todas las billeter
 router.post("/", crearWallet);                    // Crear nueva billetera
 router.delete("/:id", eliminarWallet);            // Eliminar billetera
 router.post("/transferencia", transferirEntreBilleteras); // Transferir entre billeteras
+router.patch("/:id/movimiento", modificarSaldoWallet);
+
 
 module.exports = router;
 

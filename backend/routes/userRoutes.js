@@ -10,6 +10,8 @@ router.post("/login", userController.loginUsuario);
 // Rutas protegidas
 router.get("/", verifyToken, userController.obtenerUsuarios);
 router.patch('/:id/password', verifyToken, userController.cambiarPassword);
-router.patch("/:id", verifyToken, userController.cambiarEstadoUsuario);
+router.patch("/:id", verifyToken, userController.cambiarUsuario);
+router.delete("/:id", verifyToken, userController.eliminarUsuario);
+
 
 module.exports = router;

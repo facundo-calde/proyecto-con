@@ -142,9 +142,9 @@ const cambiarPassword = async (req, res) => {
   };
   
   //Modificar usuario
-  const cambiarEstadoUsuario = async (req, res) => {
+  const cambiarUsuario = async (req, res) => {
     const { id } = req.params;
-    const { estado } = req.body;
+    const { estado, password } = req.body;
   
     try {
       const user = await User.findById(id);
@@ -152,13 +152,35 @@ const cambiarPassword = async (req, res) => {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
   
-      user.estado = estado;
+      if (estado !== undefined) {
+        user.estado = estado;
+      }
+  
+      if (password && password.trim() !== "") {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+      }
+  
       await user.save();
   
-      res.json({ message: "Estado de usuario actualizado", user });
+      res.json({ message: "Usuario actualizado correctamente", user });
     } catch (error) {
-      console.error("❌ Error al actualizar el estado del usuario:", error);
-      res.status(500).json({ message: "Error al actualizar el estado del usuario" });
+      console.error("❌ Error al modificar usuario:", error);
+      res.status(500).json({ message: "Error al modificar el usuario" });
+    }
+  };
+  
+  const eliminarUsuario = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const usuario = await User.findByIdAndDelete(id);
+      if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+  
+      res.json({ message: "Usuario eliminado correctamente" });
+    } catch (error) {
+      console.error("❌ Error al eliminar usuario:", error);
+      res.status(500).json({ message: "Error al eliminar el usuario" });
     }
   };
   
@@ -169,7 +191,8 @@ const cambiarPassword = async (req, res) => {
     crearUsuario,
     loginUsuario,
     verificarToken,
-    cambiarEstadoUsuario,
-    cambiarPassword
+    cambiarUsuario,
+    cambiarPassword,
+    eliminarUsuario 
   };
   
