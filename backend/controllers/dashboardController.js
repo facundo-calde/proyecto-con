@@ -135,27 +135,28 @@ exports.obtenerRecargas = async (req, res) => {
 exports.crearDeposito = async (req, res) => {
   try {
     const { monto, fecha, billeteraId } = req.body;
-    if (!monto || monto <= 0) {
-      return res.status(400).json({ error: "Monto inválido" });
+    
+    if (!monto || isNaN(monto) || monto === 0) {
+      return res.status(400).json({ error: "Ingresá un monto válido (positivo o negativo)" });
     }
+
     const usuario = req.user?.id;
     if (!usuario) {
       return res.status(401).json({ error: "Usuario no autenticado" });
     }
 
-    if (billeteraId) {
-      const wallet = await Wallet.findById(billeteraId);
-      if (!wallet) return res.status(404).json({ error: "Billetera no encontrada" });
-      wallet.saldo += monto;
-      wallet.movimientos.push({
-        tipo:   "entrada",
-        monto,
-        detalle:"depósito sin reclamar",
-        fecha:  fecha ? new Date(fecha) : new Date(),
-        usuario: usuario.toString()
-      });
-      await wallet.save();
-    }
+    const wallet = await Wallet.findById(billeteraId);
+    if (!wallet) return res.status(404).json({ error: "Billetera no encontrada" });
+
+    wallet.saldo += monto; // 🔄 puede sumar o restar
+    wallet.movimientos.push({
+      tipo: monto > 0 ? "entrada" : "salida",
+      monto,
+      detalle: "modificación de saldo manual",
+      fecha: fecha ? new Date(fecha) : new Date(),
+      usuario: usuario.toString()
+    });
+    await wallet.save();
 
     const nuevoDeposito = new Bill({
       monto,
@@ -171,6 +172,7 @@ exports.crearDeposito = async (req, res) => {
     res.status(500).json({ error: "Error al crear depósito" });
   }
 };
+
 
 exports.crearGasto = async (req, res) => {
   try {

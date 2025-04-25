@@ -46,7 +46,7 @@ app.use("/api/users", userRoutes);  // Rutas públicas (login, registro)
 app.use("/api/wallets", verifyToken, walletRoutes);  // Rutas protegidas
 app.use("/api/jobs", verifyToken, jobRoutes);
 app.use("/api/movimientos", verifyToken, movimientoRoutes);
-app.use("/api", verifyToken, dashboardRoutes);  // Si todo /api/* es protegido
+app.use("/api", dashboardRoutes); // ✅ ¡Así debe quedar!
 
 // Ruta para servir el frontend (index.html y otros archivos)
 app.get("*", (req, res) => {

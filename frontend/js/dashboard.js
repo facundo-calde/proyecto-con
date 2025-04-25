@@ -180,9 +180,9 @@ addLinks[0].addEventListener("click", async (e) => {
   const billeteraOptions = billeteras.map(b => `<option value="${b._id}">${b.nombre}</option>`).join("");
 
   const { value: formValues } = await Swal.fire({
-    title: "Agregar Depósito sin reclamar",
+    title: "Modificar saldo (positivo o negativo)",
     html: `
-      <input type="number" id="swal-deposito-monto" class="swal2-input" placeholder="Monto">
+      <input type="number" id="swal-deposito-monto" class="swal2-input" placeholder="Monto (ej: 100 o -100)">
       <select id="swal-deposito-billetera" class="swal2-input">
         <option value="">Seleccioná una billetera</option>
         ${billeteraOptions}
@@ -196,8 +196,8 @@ addLinks[0].addEventListener("click", async (e) => {
       const monto = parseFloat(document.getElementById("swal-deposito-monto").value);
       const billeteraId = document.getElementById("swal-deposito-billetera").value;
 
-      if (!monto || monto <= 0) {
-        Swal.showValidationMessage("Ingresá un monto válido");
+      if (isNaN(monto) || monto === 0) {
+        Swal.showValidationMessage("Ingresá un monto distinto de cero");
         return false;
       }
       if (!billeteraId) {
@@ -214,10 +214,11 @@ addLinks[0].addEventListener("click", async (e) => {
 
     const data = {
       monto,
-      billeteraId,
+      billeteraId, // ✅ Esto es lo que espera el backend
       fecha: new Date()
     };
-
+    
+    
     try {
       const response = await fetch(API_ENDPOINTS.depositos, {
         method: "POST",
@@ -229,10 +230,10 @@ addLinks[0].addEventListener("click", async (e) => {
       });
 
       if (response.ok) {
-        Swal.fire("✅ Éxito", "Depósito agregado correctamente", "success");
-        await cargarBilleteras(); // ← actualiza el saldo al instante
+        Swal.fire("✅ Éxito", "Movimiento aplicado correctamente", "success");
+        await cargarBilleteras(); // actualizar el saldo al instante
       } else {
-        Swal.fire("❌ Error", "No se pudo agregar el depósito", "error");
+        Swal.fire("❌ Error", "No se pudo registrar el movimiento", "error");
       }
     } catch (error) {
       console.error("❌ Error:", error);
@@ -240,6 +241,7 @@ addLinks[0].addEventListener("click", async (e) => {
     }
   }
 });
+
 
 
 
