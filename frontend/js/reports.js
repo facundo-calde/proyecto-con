@@ -199,20 +199,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (btnImprimir) {
         btnImprimir.addEventListener("click", function () {
-            const contenido = document.getElementById("listaMovimientos").innerHTML;
+            const secciones = [
+                { titulo: "Movimientos", id: "listaMovimientos" },
+                { titulo: "Depósitos sin reclamar", id: "listaDepositos" },
+                { titulo: "Propinas", id: "listaPropinas" },
+                { titulo: "Gastos de Oficina", id: "listaGastos" },
+            ];
+    
+            let contenidoTotal = "";
+    
+            secciones.forEach(sec => {
+                const ul = document.getElementById(sec.id);
+                const html = ul ? ul.innerHTML : "<li>No hay datos</li>";
+                contenidoTotal += `
+                    <h2>${sec.titulo}</h2>
+                    <ul style="list-style: none; padding: 0;">${html}</ul>
+                    <hr>
+                `;
+            });
+    
             const ventana = window.open("", "PRINT", "height=600,width=800");
             ventana.document.write(`
                 <html>
                     <head>
-                        <title>Reporte de Movimientos</title>
+                        <title>Reporte General</title>
                         <style>
                             body { font-family: Arial, sans-serif; padding: 20px; }
+                            h2 { margin-top: 30px; }
                             .movimiento-card { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
                         </style>
                     </head>
                     <body>
-                        <h1>Reporte de Movimientos</h1>
-                        <ul style="list-style: none; padding: 0;">${contenido}</ul>
+                        <h1>Reporte Mensual</h1>
+                        ${contenidoTotal}
                     </body>
                 </html>
             `);
@@ -222,6 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ventana.close();
         });
     }
+    
 
     cargarBilleteras();
 });
