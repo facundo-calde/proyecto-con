@@ -140,38 +140,49 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    async function cargarSeccion(url, listaId, titulo) {
-        generarSweetAlertFiltro(titulo, async (start, end, billetera, puesto, usuario) => {
-            let query = [];
-            if (start) query.push(`startDate=${start}`);
-            if (end) query.push(`endDate=${end}`);
-            if (billetera) query.push(`billetera=${billetera}`);
-            if (puesto && listaId === "listaMovimientos") query.push(`puesto=${puesto}`);
-            if (usuario) query.push(`usuario=${usuario}`);
-            const finalURL = url + (query.length ? (url.includes("?") ? "&" : "?") + query.join("&") : "");
-
-            const datos = await fetchData(finalURL);
-            if (listaId === "listaDepositos") {
-                renderLista(listaId, datos, d => `
-                  <div><strong>Monto:</strong> ${d.monto}</div>
-                  <div><strong>Fecha:</strong> ${new Date(d.fecha).toLocaleDateString()}</div>
-                  <div><strong>Usuario:</strong> ${d.usuario?.nombre || 'N/A'}</div>
-                  <div><strong>Billetera:</strong> ${d.wallet?.nombre || 'N/A'}</div>
-                  <div><strong>Puesto:</strong> ${d.wallet?.caja?.name || 'N/A'}</div>
-                `);
-            } else {
-                renderLista(listaId, datos, d => `
-                    <div><strong>Monto:</strong> ${d.monto || '-'} </div>
-                    <div><strong>Descripción:</strong> ${d.descripcion || '-'} </div>
-                    <div><strong>Fecha:</strong> ${new Date(d.fecha).toLocaleDateString()}</div>
-                    <div><strong>Usuario:</strong> ${d.usuario?.nombre || 'N/A'}</div>
-                    <div><strong>Puesto:</strong> ${d.job?.name || 'N/A'}</div>
-                    <div><strong>Billetera:</strong> ${d.wallet?.nombre || 'N/A'}</div>
-                    <hr>
-                `);
+    function generarFiltroMensual(titulo, callback) {
+        Swal.fire({
+            title: titulo,
+            html: `
+                <label>Mes: <input type="month" id="mesFiltro"></label>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Aplicar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                const mesSeleccionado = document.getElementById("mesFiltro").value;
+                if (!mesSeleccionado) {
+                    Swal.showValidationMessage("Debes seleccionar un mes");
+                    return false;
+                }
+                callback(mesSeleccionado);
             }
         });
     }
+    
+    async function cargarSeccion(url, listaId, titulo) {
+        generarFiltroMensual(titulo, async (mes) => {
+            const [anio, mesNum] = mes.split("-");
+            const start = `${anio}-${mesNum}-01`;
+            const end = new Date(anio, mesNum, 0).toISOString().split("T")[0]; // último día del mes
+    
+            let query = `?startDate=${start}&endDate=${end}`;
+            const finalURL = url + query;
+    
+            const datos = await fetchData(finalURL);
+            const lista = document.getElementById(listaId);
+    
+            if (!lista) return;
+    
+            let total = 0;
+            datos.forEach(d => {
+                total += Number(d.monto || 0);
+            });
+    
+            lista.innerHTML = `<li><strong>Total del mes:</strong> $${total.toFixed(2)}</li>`;
+        });
+    }
+    
 
     const filtrosMovimientos = document.getElementById("filtrosMovimientos");
     const btnFiltroDepositos = document.querySelector(".btnFiltroDepositos");
