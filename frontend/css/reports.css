@@ -1,0 +1,149 @@
+body {
+    background-color: #f8f9fa;
+    margin: 0;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0f1f2c;
+    padding: 0;
+    box-shadow: 1px 1px 3px #cacfd2;
+    margin: 0;
+    
+}
+
+.navbarBrand  img{
+    height: 35px;
+    width: 65px;
+    padding: 5px;
+    margin: 0;
+}
+
+.navbar a {
+    font-size: 11px;
+    text-decoration: none;
+    color: white;
+    padding: 5px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+.textWhite{
+    color: white;
+    font-size: 14px;
+}
+.containerUser{
+    margin-top: 10px;
+    background-color: white;
+}
+
+.back {
+    font-size: 15px;
+}
+
+/* Asegura que el modal de SweetAlert2 esté bien centrado */
+.swal2-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: fixed !important;
+    inset: 0 !important; /* top: 0, left: 0, right: 0, bottom: 0 */
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1050 !important; /* Asegura que esté por encima de todo */
+}
+
+/* Personalización del modal */
+.swal2-popup {
+    background-color: white !important;
+    border-radius: 10px !important;
+    color: grey !important;
+    border: 2px solid #263d68 !important;
+    width: 350px !important;
+    text-align: center !important;
+    margin: auto !important; /* Previene desplazamientos inesperados */
+}
+
+  
+  /* Personalización del modal */
+  .custom-popup {
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    color: #fff;
+    border: 2px solid #263d68;
+    width: 350px;
+  }
+  
+  .custom-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #263d68;
+  }
+  
+  .custom-content {
+    font-size: 14px;
+    color: #ddd;
+  }
+
+  
+
+/* 🔹 Personalizar el contenedor principal */
+.swal2-popup {
+    border-radius: 8px; /* Bordes redondeados */
+    background: #ffffff; /* Fondo blanco */
+    color: #0f1f2c; /* Color principal de texto */
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ddd;
+}
+
+/* 🔹 Personalizar el título */
+.swal2-title {
+    color: #0f1f2c; /* Azul oscuro */
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 🔹 Personalizar los inputs */
+.swal2-input,
+.swal2-select {
+    background: #f8f9fa; /* Gris claro */
+    color: #0f1f2c; /* Texto oscuro */
+    border: 1px solid #0f1f2c;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 8px;
+    width: 80%;
+}
+
+/* 🔹 Personalizar los botones */
+.swal2-confirm {
+    background: #0f1f2c !important; /* Azul oscuro */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+.swal2-cancel {
+    background: #dc2626 !important; /* Rojo */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+/* 🔹 Agregar efecto hover a los botones */
+.swal2-confirm:hover {
+    background: #1e293b !important; /* Azul más oscuro */
+}
+
+.swal2-cancel:hover {
+    background: #b91c1c !important; /* Rojo más oscuro */
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin</title>
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/dashboardAdmin.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a class="navbarBrand" href="index.html">
+            <img src="assets/logoTexto.png" alt="Flowix Logo">
+        </a>
+        <div class="navbarA">
+            <span class="textWhite">BIENVENIDO, <strong>USUARIO</strong>.</span>
+            <a href="#" class="changePassword">CAMBIAR CONTRASEÑA</a>
+            <a href="#" class="logout">CERRAR SESIÓN</a>
+        </div>
+    </nav>
+    
+    <!-- Sección para visualizar billeteras -->
+    <div class="containerBilleteras">
+        <div class="card billetera-summary">
+            <div class="titles">BILLETERAS</div>
+            <div class="cardBody">
+                <ul id="listaBilleteras">
+                    <li>Cargando billeteras...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="containerUser">
+        <div class="card mb-3">
+            <div class="titles">USUARIOS</div>
+            <div class="cardBody">
+                <p>Usuarios: <a href="#" id="agregarUsuario" class="add">➕ Agregar</a> | <a href="#" class="modifyUser">✏️ Modificar</a></p>
+                <p>Reportes: <a href="reports.html" class="add">➕ Ver</a></p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="titles">LOCALES</div>
+            <div class="cardBody">
+                <p>Billeteras: 
+                    <a href="#" id="agregarWallet" class="add">➕ Agregar</a> | 
+                    <a href="#" class="modifyWallet">🛠️ Modificar saldo</a> | 
+                    <a href="#" class="deleteWallet">✏️ Borrar</a>
+                  </p>
+                  
+                    Puestos de trabajo: 
+                    <a href="#" class="add add-job">➕ Agregar</a> | 
+                    <a href="#" class="modify modify-job">✏️ Modificar</a> | 
+                    <a href="#" class="delete delete-job">🗑️ Borrar</a>
+                  </p>
+                  
+            </div>
+        </div>
+
+    </div>
+    <script type="module" src="js/dashboardAdmin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+body {
+    background-color: #f8f9fa;
+    margin: 0;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0f1f2c;
+    padding: 0;
+    box-shadow: 1px 1px 3px #cacfd2;
+    margin: 0;
+    
+}
+
+.navbarBrand  img{
+    height: 35px;
+    width: 65px;
+    padding: 5px;
+    margin: 0;
+}
+
+.navbar a {
+    font-size: 11px;
+    text-decoration: none;
+    color: white;
+    padding: 5px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+.textWhite{
+    color: white;
+    font-size: 14px;
+}
+.transactions {
+    margin-top: 15px;
+}
+.titles{
+    background-color: #0f1f2c;
+    padding: 5px 10px;
+    color: white;
+    margin-top: 10px;
+}
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    background-color:#ffffff ;
+}
+
+.card-header {
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: #0f1f2c;
+}
+
+.cardBody p {
+    display: flex;
+    padding-right: 20px;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 12px;
+}
+
+.cardBody p:last-child {
+    border-bottom: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+.add {
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
+.modify{
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
+.containerFicha .card.ficha-summary {
+    background-color: #f0f0f0;  /* Color de fondo (ajusta según tu preferencia) */
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid grey;
+  }
+  
+  .containerFicha .card.ficha-summary .cardBody p {
+    font-size: 15px;  /* Aumenta el tamaño de la fuente */
+    margin: 0;
+  }
+  
+  .containerFicha .card.ficha-summary .cardBody p strong {
+    font-size: 20px;  /* Si quieres que el número sea aun más grande */
+    color: #333;
+  }
+  
+/* 🔹 Contenedor de billeteras */
+#listaBilleteras {
+    display: flex;
+    flex-wrap: wrap; /* Permite que pasen a la siguiente línea si no caben */
+    gap: 10px; /* Espaciado entre billeteras */
+    justify-content: flex-start; /* Alinear billeteras a la izquierda */
+    padding: 10px;
+    list-style: none; /* Elimina los puntos de la lista */
+    margin: 0;
+}
+
+/* 🔹 Tarjeta individual de cada billetera */
+.billetera-card {
+    flex: 1 1 calc(25% - 10px); /* 4 billeteras por fila, ajusta según necesidad */
+    min-width: 80px;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* 🔹 Colores distintos para cada billetera */
+.billetera-card:nth-child(1) { background-color: #1E3A8A; } /* Azul oscuro */
+.billetera-card:nth-child(2) { background-color: #9333EA; } /* Morado */
+.billetera-card:nth-child(3) { background-color: #E11D48; } /* Rojo */
+.billetera-card:nth-child(4) { background-color: #15803D; } /* Verde */
+.billetera-card:nth-child(5) { background-color: #A16207; } /* Mostaza */
+.billetera-card:nth-child(6) { background-color: #0D9488; } /* Turquesa */
+
+/* 🔹 Ajustes para el texto dentro de la billetera */
+.billetera-card strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.billetera-card span {
+    font-size: 16px;
+}
+
+
+
+/* 🔹 Personalizar el contenedor principal */
+.swal2-popup {
+    border-radius: 8px; /* Bordes redondeados */
+    background: #ffffff; /* Fondo blanco */
+    color: #0f1f2c; /* Color principal de texto */
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ddd;
+}
+
+/* 🔹 Personalizar el título */
+.swal2-title {
+    color: #0f1f2c; /* Azul oscuro */
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 🔹 Personalizar los inputs */
+.swal2-input,
+.swal2-select {
+    background: #f8f9fa; /* Gris claro */
+    color: #0f1f2c; /* Texto oscuro */
+    border: 1px solid #0f1f2c;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 8px;
+    width: 80%;
+}
+
+/* 🔹 Personalizar los botones */
+.swal2-confirm {
+    background: #0f1f2c !important; /* Azul oscuro */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+.swal2-cancel {
+    background: #dc2626 !important; /* Rojo */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+/* 🔹 Agregar efecto hover a los botones */
+.swal2-confirm:hover {
+    background: #1e293b !important; /* Azul más oscuro */
+}
+
+.swal2-cancel:hover {
+    background: #b91c1c !important; /* Rojo más oscuro */
+}

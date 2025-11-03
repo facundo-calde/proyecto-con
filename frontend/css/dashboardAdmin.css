@@ -1,0 +1,157 @@
+body {
+    background-color: #f8f9fa;
+    margin: 0;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0f1f2c;
+    padding: 0;
+    box-shadow: 1px 1px 3px #cacfd2;
+    margin: 0;
+    
+}
+
+.navbarBrand  img{
+    height: 35px;
+    width: 65px;
+    padding: 5px;
+    margin: 0;
+}
+
+.navbar a {
+    font-size: 11px;
+    text-decoration: none;
+    color: white;
+    padding: 5px;
+    margin: 0;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+.textWhite{
+    color: white;
+    font-size: 14px;
+}
+.containerUser{
+    margin-top: 10px;
+    background-color: white;
+}
+.titles{
+    background-color: #0f1f2c;
+    padding: 5px 10px;
+    color: white;
+}
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    background-color:white ;
+}
+
+.card-header {
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: #0f1f2c;
+}
+
+.cardBody p {
+    display: flex;
+    padding-right: 20px;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 12px;
+}
+
+.cardBody p:last-child {
+    border-bottom: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+.add {
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
+.modifyUser {
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
+.deleteWallet {
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
+.modify{
+    padding:0 5px 0 5px;
+    color: #0f1f2c;
+
+}
+
+/* 🔹 Personalizar el contenedor principal */
+.swal2-popup {
+    border-radius: 8px; /* Bordes redondeados */
+    background: #ffffff; /* Fondo blanco */
+    color: #0f1f2c; /* Color principal de texto */
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ddd;
+}
+
+/* 🔹 Personalizar el título */
+.swal2-title {
+    color: #0f1f2c; /* Azul oscuro */
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 🔹 Personalizar los inputs */
+.swal2-input,
+.swal2-select {
+    background: #f8f9fa; /* Gris claro */
+    color: #0f1f2c; /* Texto oscuro */
+    border: 1px solid #0f1f2c;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 8px;
+    width: 80%;
+}
+
+/* 🔹 Personalizar los botones */
+.swal2-confirm {
+    background: #0f1f2c !important; /* Azul oscuro */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+.swal2-cancel {
+    background: #dc2626 !important; /* Rojo */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 8px 15px !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+}
+
+/* 🔹 Agregar efecto hover a los botones */
+.swal2-confirm:hover {
+    background: #1e293b !important; /* Azul más oscuro */
+}
+
+.swal2-cancel:hover {
+    background: #b91c1c !important; /* Rojo más oscuro */
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes</title>
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/reports.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a class="navbarBrand" href="index.html">
+            <img src="assets/logoTexto.png" alt="Flowix Logo">
+        </a>
+        <div class="navbarA">
+            <a href="dashboardAdmin.html" class="back">VOLVER</a>
+            <a href="#" class="logout">CERRAR SESIÓN</a>
+        </div>
+    </nav>
+
+    <!-- Contenedor para los filtros y la información -->
+    <div class="containerUser">
+        <!-- Sección de Billeteras -->
+        <div class="card mb-3">
+            <div class="titles">Billeteras</div>
+            <div class="cardBody">
+                <ul id="listaBilleteras">
+                    <li>Cargando billeteras...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sección de Movimientos de Fichas -->
+        <div class="card mb-3">
+            <div class="titles">Reportes</div>
+            <div class="cardBody">
+                <button id="filtrosMovimientos">Aplicar Filtros</button>
+                <button id="btnImprimir">Imprimir Reporte</button>
+                <ul id="listaMovimientos">
+                    <li>Cargando movimientos...</li>
+                </ul>
+            </div>
+        </div>
+<!-- Sección de Depósitos sin reclamar -->
+<div class="card mb-3">
+    <div class="titles">Depósitos sin reclamar</div>
+    <div class="cardBody">
+        <button class="btnFiltroDepositos">Aplicar Filtros</button>
+        <ul id="listaDepositos">
+            <li>Cargando depósitos...</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Sección de Propinas -->
+<div class="card mb-3">
+    <div class="titles">Propinas</div>
+    <div class="cardBody">
+        <button class="btnFiltroPropinas">Aplicar Filtros</button>
+        <ul id="listaPropinas">
+            <li>Cargando propinas...</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Sección de Gastos de Oficina -->
+<div class="card mb-3">
+    <div class="titles">Gastos de Oficina</div>
+    <div class="cardBody">
+        <button class="btnFiltroGastos">Aplicar Filtros</button>
+        <ul id="listaGastos">
+            <li>Cargando gastos...</li>
+        </ul>
+    </div>
+</div>
+
+
+
+        <script type="module" src="js/reports.js"></script>
+</body>
+
+</html>
